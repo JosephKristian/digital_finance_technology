@@ -1,0 +1,278 @@
+.notification-custom {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 1000;
+    width: 320px;
+    max-width: 90%;
+    transition: transform 0.3s ease, opacity 0.3s ease;
+    opacity: 0;
+    transform: translateY(-20px);
+    font-family: 'Arial', sans-serif;
+  }
+  
+  .notification-custom.show {
+    opacity: 1;
+    transform: translateY(0);
+    animation: slide-in-custom 0.5s ease forwards;
+  }
+  
+  @keyframes slide-in-custom {
+    0% {
+      transform: translate(-50%, -60%);
+      opacity: 0;
+    }
+    100% {
+      transform: translate(-50%, -50%);
+      opacity: 1;
+    }
+  }
+  
+  .container-custom {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+  }
+  
+  .box-custom {
+    background-color: #fff;
+    border-radius: 12px;
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+    padding: 24px;
+    margin-bottom: 10px;
+    text-align: center;
+    overflow: hidden;
+    position: relative;
+  }
+  
+  .dot-custom {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    position: absolute;
+    top: 12px;
+    left: 12px;
+  }
+  
+  .dot-success-custom {
+    background-color: #4CAF50;
+  }
+  
+  .dot-error-custom {
+    background-color: #F44336;
+  }
+  
+  .loader-custom {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 10px;
+    height: 40px;
+  }
+  
+  .loader-custom span {
+    display: block;
+    width: 10px;
+    height: 10px;
+    background-color: #4CAF50;
+    border-radius: 50%;
+    margin: 0 5px;
+    animation: bounce-custom 1.2s infinite ease-in-out;
+  }
+  
+  .loader-custom span:nth-child(2) {
+    animation-delay: 0.2s;
+  }
+  
+  .loader-custom span:nth-child(3) {
+    animation-delay: 0.4s;
+  }
+  
+  @keyframes bounce-custom {
+    0%, 80%, 100% {
+      transform: scale(0);
+    }
+    40% {
+      transform: scale(1);
+    }
+  }
+  
+  .face-custom, .face2-custom {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 16px 0;
+    animation: smile-custom 1.5s ease-in-out infinite;
+  }
+  
+  .eye-custom {
+    width: 12px;
+    height: 12px;
+    background-color: #000;
+    border-radius: 50%;
+    margin: 0 8px;
+    animation: blink-custom 3s infinite;
+  }
+  
+  .mouth-custom {
+    width: 24px;
+    height: 12px;
+    border: 2px solid #000;
+    border-radius: 12px;
+    position: relative;
+  }
+  
+  .mouth-happy-custom {
+    border-top: none;
+  }
+  
+  .mouth-sad-custom {
+    border-bottom: none;
+    transform: rotate(180deg);
+  }
+  
+  .shadow-custom {
+    width: 60px;
+    height: 8px;
+    background-color: rgba(0, 0, 0, 0.1);
+    border-radius: 50%;
+    margin: 0 auto;
+    margin-top: 8px;
+  }
+  
+  .message-custom {
+    margin-top: 12px;
+  }
+  
+  .message-custom h1 {
+    font-size: 18px;
+    font-weight: bold;
+    color: #333;
+  }
+  
+  .message-custom p {
+    font-size: 14px;
+    color: #666;
+  }
+  
+  .button-custom {
+    background-color: #f1f1f1;
+    border: none;
+    border-radius: 8px;
+    padding: 10px 20px;
+    cursor: pointer;
+    margin-top: 16px;
+    transition: background-color 0.3s ease, color 0.3s ease;
+  }
+  
+  .button-custom:hover {
+    background-color: #e0e0e0;
+  }
+  
+  .button-custom h1 {
+    font-size: 16px;
+    margin: 0;
+  }
+  
+  .red-custom {
+    color: #F44336;
+  }
+  
+  .green-custom {
+    color: #4CAF50;
+  }
+  
+  @keyframes blink-custom {
+    0%, 20% { transform: scale(1); }
+    10% { transform: scale(0.8); }
+  }
+  
+  @keyframes smile-custom {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-5px); }
+  }
+
+  
+
+/* Success Animation */
+.face-success-custom {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    background-color: #4CAF50;
+    position: relative;
+    margin: 20px auto;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  
+  .checkmark {
+    width: 50px;
+    height: 50px;
+    border: 5px solid white;
+    border-top: none;
+    border-right: none;
+    transform: rotate(-45deg);
+    animation: draw-check 0.5s ease-in-out forwards;
+  }
+  
+  @keyframes draw-check {
+    from {
+      stroke-dasharray: 50;
+      stroke-dashoffset: 50;
+    }
+    to {
+      stroke-dasharray: 50;
+      stroke-dashoffset: 0;
+    }
+  }
+  
+  /* Error Animation */
+  .face-error-custom {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    background-color: #F44336;
+    position: relative;
+    margin: 20px auto;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  
+  .crossmark {
+    position: relative;
+    width: 60px;
+    height: 60px;
+  }
+  
+  .crossmark::before,
+  .crossmark::after {
+    content: '';
+    position: absolute;
+    width: 60px;
+    height: 10px;
+    background: white;
+    border-radius: 5px;
+    animation: draw-cross 0.5s ease-in-out forwards;
+  }
+  
+  .crossmark::before {
+    transform: rotate(45deg);
+  }
+  
+  .crossmark::after {
+    transform: rotate(-45deg);
+  }
+  
+  @keyframes draw-cross {
+    from {
+      transform: scale(0);
+    }
+    to {
+      transform: scale(1);
+    }
+  }
