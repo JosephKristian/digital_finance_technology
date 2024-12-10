@@ -41,7 +41,7 @@
                         </nav>
                     </div>
 
-                    
+
 
                     <div class="sb-sidenav-menu-heading">Transaksi</div>
                     <a class="nav-link collapsed" href="#" data-bs-toggle="collapse"
@@ -54,10 +54,10 @@
                         data-bs-parent="#sidenavAccordion">
                         <nav class="sb-sidenav-menu-nested nav">
                             <a class="nav-link" href="{{ route('transactions.index') }}">
-                            <div class="sb-nav-link-icon">
-                                <i class="fas fa-shopping-cart"></i> <!-- Ikon untuk Penjualan -->
-                            </div>
-                            Penjualan
+                                <div class="sb-nav-link-icon">
+                                    <i class="fas fa-shopping-cart"></i> <!-- Ikon untuk Penjualan -->
+                                </div>
+                                Penjualan
                             </a>
                             <a class="nav-link" href="{{ route('other.transactions.index') }}">
                                 <div class="sb-nav-link-icon">
@@ -76,6 +76,31 @@
                         </div>
                         Catatan Akuntansi
                     </a>
+                    <a class="nav-link collapsed" href="#" data-bs-toggle="collapse" data-bs-target="#reportsSideBar"
+                        aria-expanded="false" aria-controls="reportsSideBar">
+                        <div class="sb-nav-link-icon"><i class="fas fa-file-alt"></i></div> <!-- Ikon dokumen laporan -->
+                        Laporan Keuangan
+                        <div class="sb-sidenav-collapse-arrow"><i class="fas fa-angle-down"></i></div>
+                    </a>
+                    <div class="collapse" id="reportsSideBar" aria-labelledby="headingOne"
+                        data-bs-parent="#sidenavAccordion">
+                        <nav class="sb-sidenav-menu-nested nav">
+                            <a class="nav-link" href="{{ route('reports.income-statement') }}">
+                                <div class="sb-nav-link-icon">
+                                    <i class="fas fa-chart-line"></i> <!-- Ikon grafik naik -->
+                                </div>
+                                Laba - Rugi
+                            </a>
+
+                            <a class="nav-link" href="{{ route('reports.balance-sheet') }}">
+                                <div class="sb-nav-link-icon">
+                                    <i class="fas fa-balance-scale"></i> <!-- Ikon timbangan -->
+                                </div>
+                                Neraca Saldo
+                            </a>
+                        </nav>
+                    </div>
+
                     <a class="nav-link" href="#">
                         <div class="sb-nav-link-icon">
                             <i class="fas fa-file-alt"></i> <!-- Ikon untuk Laporan -->

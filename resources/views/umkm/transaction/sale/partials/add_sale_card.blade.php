@@ -125,7 +125,7 @@
 
 
 
-                            <div class="card-footer d-flex justify-content-end">
+                            <div class="d-flex justify-content-end">
                                 <button type="submit" class="btn btn-primary">Simpan</button>
                             </div>
                         </form>

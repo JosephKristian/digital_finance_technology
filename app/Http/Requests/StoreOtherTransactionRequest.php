@@ -11,7 +11,7 @@ class StoreOtherTransactionRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return false;
+        return true;
     }
 
     /**
@@ -23,6 +23,11 @@ class StoreOtherTransactionRequest extends FormRequest
     {
         return [
             //
+            'tanggalTransaksi' => 'required|date',
+            'kategori' => 'required|in:income,expense',
+            'namaTransaksi' => 'required|exists:coa,id',
+            'nominal' => 'required|numeric|min:0',
+            'keterangan' => 'nullable|string|max:255',
         ];
     }
 }

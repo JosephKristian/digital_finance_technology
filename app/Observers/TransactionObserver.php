@@ -63,7 +63,7 @@ class TransactionObserver
                 Log::info('Inserting debit journal.', [
                     'transaction_id' => $transaction->id,
                     'coa_id' => $cashCoa->id,
-                    'description' => 'Penerimaan kas',
+                    'description' => 'Kas',
                     'amount' => $transaction->total_amount,
                     'type' => 'debit',
                 ]);
@@ -74,7 +74,7 @@ class TransactionObserver
                     'transaction_id' => $transaction->id,
                     'coa_id' => $cashCoa->id,
                     'umkm_id' => $transaction->umkm_id,
-                    'description' => 'Penerimaan kas',
+                    'description' => 'Kas',
                     'amount' => $transaction->total_amount,
                     'type' => 'debit',
                     'created_at' => now(),

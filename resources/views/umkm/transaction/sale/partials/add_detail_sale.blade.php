@@ -27,7 +27,7 @@
                 <div class="mb-3">
                     <label for="product_quantity" class="form-label">Jumlah Produk</label>
                     <input type="number" name="product_quantity" id="product_quantity" class="form-control"
-                        min="1" placeholder="Masukkan jumlah produk" required>
+                        min="1" required>
                 </div>
 
                 <!-- Tombol Submit -->

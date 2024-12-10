@@ -6,6 +6,7 @@ use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\TransactionController;
 use App\Http\Controllers\OtherTransactionController;
+use App\Http\Controllers\ReportController;
 use App\Http\Controllers\VerificationController;
 use Illuminate\Support\Facades\Route;
 
@@ -66,6 +67,12 @@ Route::middleware('auth')->group(function () {
         Route::patch('/transaction/{transactionId}/completed', [OtherTransactionController::class, 'markAsCompleted'])->name('completed');
         Route::delete('/{id}', [OtherTransactionController::class, 'destroyDetail'])->name('detail-destroy');
     });
+
+    Route::prefix('reports')->name('reports.')->group(function () {
+        Route::get('/income-statement', [ReportController::class, 'incomeStatement'])->name('income-statement');
+        Route::get('/balance-sheet', [ReportController::class, 'balanceSheet'])->name('balance-sheet');
+    });
+    
 });
 
 require __DIR__ . '/auth.php';

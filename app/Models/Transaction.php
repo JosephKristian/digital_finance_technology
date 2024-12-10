@@ -19,6 +19,7 @@ class Transaction extends Model
     protected $keyType = 'string';
 
     protected $fillable = [
+        'id',
         'transaction_id',
         'umkm_id',
         'customer_id',
