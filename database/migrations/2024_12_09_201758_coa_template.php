@@ -14,9 +14,10 @@ return new class extends Migration
     {
         Schema::create('coa_templates', function (Blueprint $table) {
             $table->char('id', 36)->default(DB::raw('UUID()'))->primary();
+            $table->unsignedBigInteger('coa_sub_id');
             $table->string('account_code')->unique();
             $table->string('account_name');
-            $table->enum('account_type', ['asset', 'liability', 'equity', 'income', 'expense']);
+            
             $table->char('parent_id', 36)->nullable(); // Hierarki akun
             $table->enum('category', ['current', 'non_current'])->nullable();
             $table->boolean('is_default_receipt')->default(false); // Default untuk penerimaan
@@ -24,6 +25,7 @@ return new class extends Migration
             $table->timestamps();
         
             $table->foreign('parent_id')->references('id')->on('coa_templates')->onDelete('set null');
+            $table->foreign('coa_sub_id')->references('id')->on('coa_sub_template')->onDelete('cascade');
         });
         
     }

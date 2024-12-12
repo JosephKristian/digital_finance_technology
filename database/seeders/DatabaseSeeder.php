@@ -15,9 +15,14 @@ class DatabaseSeeder extends Seeder
     {
         // User::factory(10)->create();
         $this->call(ProductSeeder::class);
+        $this->call(CustomersSeeder::class);
+        $this->call(PaymentMethodSeeder::class);
+        $this->call(CoaTemplatesSeeder::class);
         User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
+            'name' => 'SuperAdmin Digital Financial Technology',
+            'email' => 'sa@digifintech.com',
+            'password' => 'sa123#',
+            'role' => 'admin',
         ]);
     }
 }

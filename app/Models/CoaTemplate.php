@@ -15,6 +15,7 @@ class CoaTemplate extends Model
     // Kolom yang bisa diisi
     protected $fillable = [
         'id',
+        'coa_sub_id',
         'account_code',
         'account_name',
         'account_type',

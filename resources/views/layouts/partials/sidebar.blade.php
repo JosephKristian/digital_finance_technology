@@ -70,21 +70,61 @@
 
 
                     <div class="sb-sidenav-menu-heading">Berkas</div>
-                    <a class="nav-link" href="#">
-                        <div class="sb-nav-link-icon">
-                            <i class="fas fa-file-invoice"></i> <!-- Ikon untuk Catatan Akuntansi -->
-                        </div>
+
+
+                    <a class="nav-link collapsed" href="#" data-bs-toggle="collapse"
+                        data-bs-target="#accountingSideBar" aria-expanded="false" aria-controls="accountingSideBar">
+                        <div class="sb-nav-link-icon"><i class="fas fa-file-alt"></i></div> <!-- Ikon dokumen laporan -->
                         Catatan Akuntansi
+                        <div class="sb-sidenav-collapse-arrow"><i class="fas fa-angle-down"></i></div>
                     </a>
+                    <div class="collapse" id="accountingSideBar" aria-labelledby="headingOne"
+                        data-bs-parent="#sidenavAccordion">
+                        <nav class="sb-sidenav-menu-nested nav">
+
+                            <a class="nav-link" href="#">
+                                <div class="sb-nav-link-icon">
+                                    <i class="fas fa-shopping-cart"></i> <!-- Ikon untuk Penjualan -->
+                                </div>
+                                Jurnal Umum
+                            </a>
+
+
+                        </nav>
+                    </div>
                     <a class="nav-link collapsed" href="#" data-bs-toggle="collapse" data-bs-target="#reportsSideBar"
                         aria-expanded="false" aria-controls="reportsSideBar">
                         <div class="sb-nav-link-icon"><i class="fas fa-file-alt"></i></div> <!-- Ikon dokumen laporan -->
-                        Laporan Keuangan
+                        Laporan
                         <div class="sb-sidenav-collapse-arrow"><i class="fas fa-angle-down"></i></div>
                     </a>
                     <div class="collapse" id="reportsSideBar" aria-labelledby="headingOne"
                         data-bs-parent="#sidenavAccordion">
                         <nav class="sb-sidenav-menu-nested nav">
+
+                            <a class="nav-link" href="#">
+                                <div class="sb-nav-link-icon">
+                                    <i class="fas fa-shopping-cart"></i> <!-- Ikon untuk Penjualan -->
+                                </div>
+                                Penjualan
+                            </a>
+
+                            <a class="nav-link" href="#">
+                                <div class="sb-nav-link-icon">
+                                    <i class="fas fa-wallet"></i> <!-- Ikon untuk Penerimaan Kas -->
+                                </div>
+                                Penerimaan Kas
+                            </a>
+
+                            <a class="nav-link" href="#">
+                                <div class="sb-nav-link-icon">
+                                    <i class="fas fa-hand-holding-usd"></i> <!-- Ikon untuk Pengeluaran Kas -->
+                                </div>
+                                Pengeluaran Kas
+                            </a>
+
+
+                            {{-- income statement --}}
                             <a class="nav-link" href="{{ route('reports.income-statement') }}">
                                 <div class="sb-nav-link-icon">
                                     <i class="fas fa-chart-line"></i> <!-- Ikon grafik naik -->
@@ -98,15 +138,12 @@
                                 </div>
                                 Neraca Saldo
                             </a>
+
+
                         </nav>
                     </div>
 
-                    <a class="nav-link" href="#">
-                        <div class="sb-nav-link-icon">
-                            <i class="fas fa-file-alt"></i> <!-- Ikon untuk Laporan -->
-                        </div>
-                        Laporan
-                    </a>
+
                 </div>
             </div>
             <div class="sb-sidenav-footer">

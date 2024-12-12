@@ -20,7 +20,7 @@ class ProductSeeder extends Seeder
                     'umkm_id' => $umkmId,
                     'name' => 'Product ' . Str::random(5),
                     'purchase_price' => rand(1000, 100000),
-                    'selling_price' => rand(6000, 100000000),
+                    'selling_price' => rand(6000, 500000),
                     'stock_quantity' => rand(1, 200),
                     'status' => 'active',
                 ]);

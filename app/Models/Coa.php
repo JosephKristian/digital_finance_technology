@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
@@ -12,6 +13,7 @@ class Coa extends Model
     protected $fillable = [
         'id',
         'umkm_id',
+        'coa_sub_id',
         'account_code',
         'account_name',
         'account_type',
@@ -28,15 +30,22 @@ class Coa extends Model
         return $this->belongsTo(Umkm::class, 'umkm_id', 'id');
     }
 
-    // Relasi ke parent akun (jika ada)
-    public function parent()
+    // Relasi ke CoaSub
+    public function coaSub()
     {
-        return $this->belongsTo(Coa::class, 'parent_id', 'id');
+        return $this->belongsTo(CoaSub::class, 'coa_sub_id', 'coa_sub_id');
     }
 
-    // Relasi ke child akun
+
+    // Relasi ke parent Coa
+    public function parent()
+    {
+        return $this->belongsTo(self::class, 'parent_id', 'id');
+    }
+
+    // Relasi ke child Coa
     public function children()
     {
-        return $this->hasMany(Coa::class, 'parent_id', 'id');
+        return $this->hasMany(self::class, 'parent_id', 'id');
     }
 }

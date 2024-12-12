@@ -15,6 +15,7 @@ class CreateTransactionsTable extends Migration
             $table->char('customer_id', 36);
             $table->date('transaction_date');
             $table->decimal('total_amount', 15, 2);
+            $table->text('information')->nullable();
             $table->boolean('status')->nullable()->default(false);
             $table->timestamps();
 
