@@ -68,10 +68,18 @@ Route::middleware('auth')->group(function () {
         Route::delete('/{id}', [OtherTransactionController::class, 'destroyDetail'])->name('detail-destroy');
     });
 
+    // Reports
     Route::prefix('reports')->name('reports.')->group(function () {
         Route::get('/income-statement', [ReportController::class, 'incomeStatement'])->name('income-statement');
         Route::get('/balance-sheet', [ReportController::class, 'balanceSheet'])->name('balance-sheet');
+        Route::get('/sales-report', [ReportController::class, 'salesReport'])->name('sales-report');
     });
+
+    // // Accounting
+    // Route::prefix('accounting')->name('accounting.')->group(function () {
+    //     Route::get('/general-ledger', [ReportController::class, 'incomeStatement'])->name('general-ledger');
+    //     Route::get('/balance-sheet', [ReportController::class, 'balanceSheet'])->name('balance-sheet');
+    // });
     
 });
 

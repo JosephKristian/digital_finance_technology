@@ -11,7 +11,7 @@ use App\Models\UMKM;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
-
+use Illuminate\Support\Facades\Log;
 
 class TransactionController extends Controller
 {
@@ -81,8 +81,7 @@ class TransactionController extends Controller
 
         session()->put('session_start_time', now());
 
-        return redirect()->route('transactions.index')
-            ->with('success', 'Penjualan dengan ID ' . $transaction->transaction_id . ' berhasil dibuat!');
+        return redirect()->route('transactions.index');
     }
 
 
@@ -150,29 +149,89 @@ class TransactionController extends Controller
     }
 
 
+
     public function markAsCompleted($transactionId, Request $request)
     {
-        // Cari transaksi berdasarkan transaction_id
-        $transaction = Transaction::where('transaction_id', $transactionId)->firstOrFail();
+        try {
+            // Log awal fungsi
+            Log::info('Mark as completed initiated.', [
+                'transaction_id' => $transactionId,
+                'request_data' => $request->all(),
+            ]);
 
+            // Validasi input
+            $request->validate([
+                'total_sales' => 'required', // Tidak didefinisikan string/array agar fleksibel
+                'payment_method_id' => 'required|uuid',
+            ]);
 
-        // Update total_amount dengan nilai yang dikirimkan
-        $transaction->total_amount = preg_replace('/[^0-9.]/', '', $request->total_sales); // Menghilangkan karakter selain angka dan titik
+            // Log setelah validasi
+            Log::info('Validation passed.', [
+                'total_sales' => $request->total_sales,
+                'payment_method_id' => $request->payment_method_id,
+            ]);
 
-        // Update metode pembayaran yang dipilih
-        $transaction->payment_method_id = $request->payment_method_id;
+            // Cari transaksi berdasarkan transaction_id
+            $transaction = Transaction::where('transaction_id', $transactionId)->firstOrFail();
 
-        // Ubah status transaksi menjadi selesai (misalnya, 'true' atau 'completed')
-        $transaction->status = true;
+            // Log setelah mendapatkan transaksi
+            Log::info('Transaction found.', ['transaction' => $transaction]);
 
-        // Simpan perubahan
-        $transaction->save();
-        // Hapus session
-        session()->forget('transactionId');
-        session()->forget('transactionDate');
-        session()->forget('customerName');
-        session()->forget('session_start_time');
-        // Kembalikan response
-        return redirect()->route('transactions.index')->with('success', 'Asyik!! Penjualan berhasil diselesaikan.');
+            // Ambil nilai total_sales
+            $totalSalesInput = $request->total_sales;
+
+            // Jika array, ambil elemen pertama, jika bukan tetap gunakan string
+            if (is_array($totalSalesInput)) {
+                $totalSalesInput = $totalSalesInput[0] ?? ''; // Default ke string kosong jika array kosong
+            }
+
+            // Bersihkan format angka
+            $totalSalesInput = str_replace(',', '', $totalSalesInput); // Hapus koma
+            $totalSalesInput = preg_replace('/[^0-9.]/', '', $totalSalesInput); // Hilangkan karakter selain angka dan titik
+
+            // Log nilai yang sudah diproses
+            Log::info('Total sales processed.', ['total_sales_processed' => $totalSalesInput]);
+
+            // Pastikan nilai akhir adalah angka
+            $transaction->total_amount = is_numeric($totalSalesInput) ? $totalSalesInput : 0;
+
+            // Update metode pembayaran yang dipilih
+            $transaction->payment_method_id = $request->payment_method_id;
+
+            // Log sebelum menyimpan transaksi
+            Log::info('Updating transaction.', [
+                'total_amount' => $transaction->total_amount,
+                'payment_method_id' => $transaction->payment_method_id,
+                'status' => true,
+            ]);
+
+            // Ubah status transaksi menjadi selesai
+            $transaction->status = true;
+
+            // Simpan perubahan
+            $transaction->save();
+
+            // Log setelah transaksi berhasil disimpan
+            Log::info('Transaction updated successfully.', ['transaction' => $transaction]);
+
+            // Hapus session
+            session()->forget(['transactionId', 'transactionDate', 'customerName', 'session_start_time']);
+
+            // Log setelah session dihapus
+            Log::info('Session data cleared.');
+
+            // Kembalikan response
+            return redirect()->route('transactions.index')->with('success', 'Asyik!! Penjualan berhasil diselesaikan.');
+        } catch (\Exception $e) {
+            // Log jika terjadi error
+            Log::error('Error in markAsCompleted.', [
+                'transaction_id' => $transactionId,
+                'error_message' => $e->getMessage(),
+                'stack_trace' => $e->getTraceAsString(),
+            ]);
+
+            // Kembalikan response dengan error
+            return redirect()->back()->withErrors(['error' => 'Terjadi kesalahan saat menyelesaikan transaksi.']);
+        }
     }
 }

@@ -1,22 +1,25 @@
 .notification-custom {
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    z-index: 1000;
-    width: 320px;
-    max-width: 90%;
-    transition: transform 0.3s ease, opacity 0.3s ease;
-    opacity: 0;
-    transform: translateY(-20px);
-    font-family: 'Arial', sans-serif;
-  }
-  
-  .notification-custom.show {
-    opacity: 1;
-    transform: translateY(0);
-    animation: slide-in-custom 0.5s ease forwards;
-  }
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 1000;
+  width: 320px;
+  max-width: 90%;
+  transition: transform 0.3s ease, opacity 0.3s ease, visibility 0.3s ease;
+  opacity: 0;
+  visibility: hidden; /* Tambahkan ini */
+  pointer-events: none; /* Tambahkan ini */
+  font-family: 'Arial', sans-serif;
+}
+
+.notification-custom.show {
+  opacity: 1;
+  transform: translateY(0);
+  visibility: visible; /* Tampilkan ketika aktif */
+  pointer-events: auto; /* Aktifkan interaksi */
+  animation: slide-in-custom 0.5s ease forwards;
+}
   
   @keyframes slide-in-custom {
     0% {

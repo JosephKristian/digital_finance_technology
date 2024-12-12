@@ -3,6 +3,7 @@
 namespace App\Observers;
 
 use App\Models\Coa;
+use App\Models\CoaType;
 use App\Models\Transaction;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -30,32 +31,91 @@ class TransactionObserver
                 'umkm_id' => $transaction->umkm_id,
                 'total_amount' => $transaction->total_amount,
             ]);
+            // Cari tipe akun 'Asset' pada tabel coa_types
+            $assetCoaType = CoaType::where('type_name', 'Asset')->first();
+            // Cari tipe akun 'Revenue' pada tabel coa_types
+            $revenueCoaType = CoaType::where('type_name', 'Revenue')->first();
+            if (!$assetCoaType) {
+                Log::error('COA Type "Asset" not found.');
+            }
+            if (!$revenueCoaType) {
+                Log::error('COA Type "Revenue" not found.');
+            }
 
-            // Cari COA untuk kas/bank
-            $cashCoa = Coa::where('umkm_id', $transaction->umkm_id)
-                ->where('account_type', 'asset')
-                ->where('is_default_receipt', true)
-                ->first();
 
-            Log::info('Cash COA fetched.', [
-                'umkm_id' => $transaction->umkm_id,
-                'cash_coa_id' => $cashCoa?->id,
-                'cash_coa_account_code' => $cashCoa?->account_code,
-                'cash_coa_account_name' => $cashCoa?->account_name,
+            // Log untuk memastikan tipe akun Asset dan Revenue ditemukan
+            Log::info('Fetching COA Types for Asset and Revenue.', [
+                'asset_coa_type_id' => $assetCoaType->coa_type_id ?? null,
+                'revenue_coa_type_id' => $revenueCoaType->coa_type_id ?? null,
             ]);
+
+            // Cari Cash COA
+            try {
+                $cashCoa = Coa::where('umkm_id', $transaction->umkm_id)
+                    ->where('is_default_receipt', true) // Default penerimaan
+                    ->whereHas('coaSub', function ($query) use ($assetCoaType, $transaction) {
+                        $query->where('coa_type_id', $assetCoaType->coa_type_id)
+                            ->where('umkm_id', $transaction->umkm_id);
+                    })
+                    ->first();
+
+                // Log hasil query Cash COA
+                Log::info('Cash COA fetched successfully.', [
+                    'umkm_id' => $transaction->umkm_id,
+                    'cash_coa_id' => $cashCoa->id ?? null,
+                    'cash_coa_account_code' => $cashCoa->account_code ?? null,
+                    'cash_coa_account_name' => $cashCoa->account_name ?? null,
+                ]);
+            } catch (\Exception $e) {
+                // Log jika terjadi error saat mencari Cash COA
+                Log::error('Error fetching Cash COA.', [
+                    'umkm_id' => $transaction->umkm_id,
+                    'error_message' => $e->getMessage(),
+                ]);
+            }
+
+            // Cari Income COA
+            try {
+
+                $incomeCoa = Coa::where('umkm_id', $transaction->umkm_id)
+                    ->where('is_default_receipt', true) // Default penerimaan
+                    ->where('account_code', '40101') // Default penerimaan
+                    ->whereHas('coaSub', function ($query) use ($revenueCoaType, $transaction) {
+                        $query->where('coa_type_id', $revenueCoaType->coa_type_id)
+                            ->where('umkm_id', $transaction->umkm_id);
+                    })
+                    ->first();
+
+
+                // Log hasil query Income COA
+                Log::info('Income COA fetched successfully.', [
+                    'umkm_id' => $transaction->umkm_id,
+                    'income_coa_id' => $incomeCoa->id ?? null,
+                    'income_coa_account_code' => $incomeCoa->account_code ?? null,
+                    'income_coa_account_name' => $incomeCoa->account_name ?? null,
+                ]);
+            } catch (\Exception $e) {
+                // Log jika terjadi error saat mencari Income COA
+                Log::error('Error fetching Income COA.', [
+                    'umkm_id' => $transaction->umkm_id,
+                    'error_message' => $e->getMessage(),
+                ]);
+                dd('ERROR incomeCoa');
+            }
+
+
+            if (!$cashCoa) {
+                Log::warning('Default Cash COA not found.', ['umkm_id' => $transaction->umkm_id]);
+                dd('ERROR cashCOA');
+            }
+            if (!$incomeCoa) {
+                Log::warning('Default income COA not found.', ['umkm_id' => $transaction->umkm_id]);
+                dd('ERROR incomeCoa');
+            }
+
 
             // Cari COA untuk pendapatan
-            $incomeCoa = Coa::where('umkm_id', $transaction->umkm_id)
-                ->where('account_type', 'income')
-                ->where('is_default_receipt', true)
-                ->first();
 
-            Log::info('Income COA fetched.', [
-                'umkm_id' => $transaction->umkm_id,
-                'income_coa_id' => $incomeCoa?->id,
-                'income_coa_account_code' => $incomeCoa?->account_code,
-                'income_coa_account_name' => $incomeCoa?->account_name,
-            ]);
 
             // Periksa apakah kedua COA ditemukan
             if ($cashCoa && $incomeCoa) {
@@ -85,7 +145,6 @@ class TransactionObserver
                 Log::info('Inserting credit journal.', [
                     'transaction_id' => $transaction->id,
                     'coa_id' => $incomeCoa->id,
-                    'description' => 'Pendapatan penjualan',
                     'amount' => $transaction->total_amount,
                     'type' => 'credit',
                 ]);
@@ -120,6 +179,12 @@ class TransactionObserver
         } catch (\Exception $e) {
             // Log error jika terjadi exception
             Log::error('Error occurred during journal creation in TransactionObserver.', [
+                'transaction_id' => $transaction->id,
+                'umkm_id' => $transaction->umkm_id,
+                'error_message' => $e->getMessage(),
+                'stack_trace' => $e->getTraceAsString(),
+            ]);
+            dd('Error occurred during journal creation in TransactionObserver.', [
                 'transaction_id' => $transaction->id,
                 'umkm_id' => $transaction->umkm_id,
                 'error_message' => $e->getMessage(),

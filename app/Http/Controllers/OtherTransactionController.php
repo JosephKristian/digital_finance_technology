@@ -6,26 +6,48 @@ use App\Models\OtherTransaction;
 use App\Http\Requests\StoreOtherTransactionRequest;
 use App\Http\Requests\UpdateOtherTransactionRequest;
 use App\Models\Coa;
+use App\Models\CoaType;
 use App\Models\Journal;
 use App\Models\Transaction;
 use App\Models\Umkm;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 
 class OtherTransactionController extends Controller
 {
     /**
      * Display a listing of the resource.
+/**
+     * Tampilkan halaman transaksi lainnya.
      */
     public function index()
     {
-        // Ambil data COA berdasarkan kategori account_type
-        $incomeOptions = Coa::where('account_type', 'income')
-            ->where('is_active', true)
+        // Ambil data COA berdasarkan kategori coa_type_id
+        $incomeTypeId = CoaType::where('type_name', 'Revenue')->first()?->coa_type_id; // Cari ID untuk tipe Revenue
+        $expenseTypeId = CoaType::where('type_name', 'Expense')->first()?->coa_type_id; // Cari ID untuk tipe Expense
+        $umkm = Umkm::where('user_id', Auth::user()->id)->firstOrFail();
+        // Validasi jika tipe tidak ditemukan
+        if (!$incomeTypeId || !$expenseTypeId) {
+            abort(500, 'COA types for Revenue or Expense not found.');
+        }
+
+        $incomeOptions = Coa::where('is_active', true)
+            ->where('umkm_id', $umkm->id)
+            ->whereHas('coaSub', function ($query) use ($umkm) {
+                $query->where('coa_type_id', 4) // 4 = Revenue
+                    ->where('umkm_id', $umkm->id);
+            })
             ->pluck('account_name', 'id');
-        $expenseOptions = Coa::where('account_type', 'expense')
-            ->where('is_active', true)
+
+        $expenseOptions = Coa::where('is_active', true)
+            ->where('umkm_id', $umkm->id)
+            ->whereHas('coaSub', function ($query) use ($umkm) {
+                $query->where('coa_type_id', 5) // 5 = Expense
+                    ->where('umkm_id', $umkm->id);
+            })
             ->pluck('account_name', 'id');
+
 
         return view('umkm.transaction.others.index', [
             'incomeOptions' => $incomeOptions,
@@ -38,18 +60,14 @@ class OtherTransactionController extends Controller
      */
     public function create(StoreOtherTransactionRequest $request)
     {
-        // dd($request);
-        // Ambil data UMKM berdasarkan pengguna yang login
         $umkm = Umkm::where('user_id', Auth::user()->id)->firstOrFail();
-        $transactionId = 'PSN-' . date('Ymd') . substr(uniqid('', true), -4);
-
-        // Generate UUID untuk transaksi
+        $transactionId = 'OTR-' . date('Ymd') . substr(uniqid('', true), -4);
         $uuidTransaction = Str::uuid();
 
         // Simpan transaksi
         Transaction::create([
             'id' => $uuidTransaction,
-            'umkm_id' => $umkm->id, // UMKM_ID diambil dari pengguna yang login
+            'umkm_id' => $umkm->id,
             'transaction_id' => $transactionId,
             'transaction_date' => $request->tanggalTransaksi,
             'total_amount' => $request->nominal,
@@ -57,25 +75,21 @@ class OtherTransactionController extends Controller
             'status' => true,
         ]);
 
-        // Tentukan kategori transaksi
         $transactionCategory = $request->kategori == 'income' ? 'Penerimaan' : 'Pengeluaran';
 
-        // Ambil COA terkait berdasarkan kategori (untuk transaksi debit)
+        // Tentukan COA
         if ($request->kategori == 'income') {
-            // Income: Debit adalah kas/bank, Kredit adalah COA dari $request->namaTransaksi
             $coaDebit = Coa::where('umkm_id', $umkm->id)
                 ->where('is_active', true)
-                ->where('is_default_receipt', true) // Kas atau bank
+                ->where('account_code', '10101')
+                ->where('is_default_receipt', true)
                 ->first();
 
             $coaCredit = Coa::where('id', $request->namaTransaksi)
                 ->where('umkm_id', $umkm->id)
                 ->where('is_active', true)
                 ->first();
-        }
-
-        if ($request->kategori == 'expense') {
-            // Expense: Debit adalah COA dari $request->namaTransaksi, Kredit adalah kas/bank
+        } elseif ($request->kategori == 'expense') {
             $coaDebit = Coa::where('id', $request->namaTransaksi)
                 ->where('umkm_id', $umkm->id)
                 ->where('is_active', true)
@@ -83,54 +97,58 @@ class OtherTransactionController extends Controller
 
             $coaCredit = Coa::where('umkm_id', $umkm->id)
                 ->where('is_active', true)
-                ->where('is_default_receipt', true) // Kas atau bank
+                ->where('account_code', '10101')
+                ->where('is_default_receipt', true)
                 ->first();
         }
 
         if (!$coaDebit || !$coaCredit) {
+            Log::error("COA terkait tidak ditemukan untuk transaksi ID: {$transactionId}", ['request' => $request->all()]);
             return redirect()->route('other.transactions.index')->with('error', 'COA terkait tidak ditemukan.');
         }
 
-        // Keterangan untuk jurnal akan diambil dari COA
-        $descriptionDebit = $coaDebit->account_name;
-        $descriptionCredit = $coaCredit->account_name;
-
-        // Buat entri jurnal untuk transaksi debit
-        $journalDebit = new Journal([
+        // Simpan jurnal
+        Journal::create([
             'umkm_id' => $umkm->id,
             'transaction_id' => $uuidTransaction,
             'coa_id' => $coaDebit->id,
-            'description' => $descriptionDebit, // Atau bisa disesuaikan untuk pengeluaran
+            'description' => $coaDebit->account_name,
             'amount' => $request->nominal,
             'type' => 'debit',
         ]);
-        $journalDebit->save();
 
-        // Buat entri jurnal untuk transaksi kredit
-        $journalCredit = new Journal([
+        Journal::create([
             'umkm_id' => $umkm->id,
             'transaction_id' => $uuidTransaction,
             'coa_id' => $coaCredit->id,
-            'description' => $descriptionCredit, // Atau bisa disesuaikan untuk pengeluaran
+            'description' => $coaCredit->account_name,
             'amount' => $request->nominal,
             'type' => 'credit',
         ]);
-        $journalCredit->save();
 
-        // Detail transaksi untuk feedback
+
+        Log::info("Transaksi berhasil disimpan", [
+            'transaction_id' => $transactionId,
+            'umkm_id' => $umkm->id,
+            'nominal' => $request->nominal,
+            'kategori' => $transactionCategory,
+            'tanggal' => $request->tanggalTransaksi,
+        ]);
+
+        // Detail untuk notifikasi
         $transactionDetails = [
             'transaksi' => $request->keterangan,
-            'nominal' => 'Rp. '.number_format($request->nominal, 2, ',', '.'),
+            'nominal' => 'Rp. ' . number_format($request->nominal, 2, ',', '.'),
             'kategori' => $transactionCategory,
             'tanggal' => $request->tanggalTransaksi,
         ];
 
-        return redirect()->route('other.transactions.index')->with('success', 'Transaksi berhasil disimpan! Detail: ' .
-            'Transaksi: ' . $transactionDetails['transaksi'] .
-            ', Nominal: ' . $transactionDetails['nominal'] .
-            ', Kategori: ' . $transactionDetails['kategori'] .
-            ', Tanggal: ' . $transactionDetails['tanggal']);
+        // Kirim notifikasi atau umpan balik
+        return redirect()->route('other.transactions.index')->with('success', "Transaksi berhasil disimpan! Detail: " .
+            "Transaksi: {$transactionDetails['transaksi']}, Nominal: {$transactionDetails['nominal']}, " .
+            "Kategori: {$transactionDetails['kategori']}, Tanggal: {$transactionDetails['tanggal']}");
     }
+
 
 
     // Fungsi untuk mencari COA kredit yang cocok
