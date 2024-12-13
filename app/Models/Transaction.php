@@ -23,6 +23,7 @@ class Transaction extends Model
         'transaction_id',
         'umkm_id',
         'customer_id',
+        'information',
         'transaction_date',
         'total_amount',
     ];

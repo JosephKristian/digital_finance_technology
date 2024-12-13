@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\DoccumentController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\TransactionController;
@@ -73,6 +74,8 @@ Route::middleware('auth')->group(function () {
         Route::get('/income-statement', [ReportController::class, 'incomeStatement'])->name('income-statement');
         Route::get('/balance-sheet', [ReportController::class, 'balanceSheet'])->name('balance-sheet');
         Route::get('/sales-report', [ReportController::class, 'salesReport'])->name('sales-report');
+        Route::get('/cash-inflows', [ReportController::class, 'cashInflows'])->name('cash-inflows');
+        Route::get('/cash-outflows', [ReportController::class, 'cashOutflows'])->name('cash-outflows');
     });
 
     // // Accounting
@@ -80,7 +83,18 @@ Route::middleware('auth')->group(function () {
     //     Route::get('/general-ledger', [ReportController::class, 'incomeStatement'])->name('general-ledger');
     //     Route::get('/balance-sheet', [ReportController::class, 'balanceSheet'])->name('balance-sheet');
     // });
-    
+
+    Route::post('/print-pdf/income-statement', [DoccumentController::class, 'printPDFIncomeStatement'])->name('print.pdf.income.statement');
+    Route::post('/print-excel/income-statement', [DoccumentController::class, 'printExcelIncomeStatement'])->name('print.excel.income.statement');
+
+    Route::post('/print-pdf/cash-inflows', [DoccumentController::class, 'printPDFCashInflows'])->name('print.pdf.cash.inflows');
+    Route::post('/print-excel/cash-inflows', [DoccumentController::class, 'printExcelCashInflows'])->name('print.excel.cash.inflows');
+
+    Route::post('/print-pdf/cash-outflows', [DoccumentController::class, 'printPDFCashOutflows'])->name('print.pdf.cash.outflows');
+    Route::post('/print-excel/cash-outflows', [DoccumentController::class, 'printExcelCashOutflows'])->name('print.excel.cash.outflows');
+
+    Route::post('/print-pdf/sales-report', [DoccumentController::class, 'printPDFSalesReport'])->name('print.pdf.sales.report');
+    Route::post('/print-excel/sales-report', [DoccumentController::class, 'printExcelSalesReport'])->name('print.excel.sales.report');
 });
 
 require __DIR__ . '/auth.php';

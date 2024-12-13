@@ -1,19 +1,19 @@
 @extends('layouts.sb-admin')
 
-@section('title', 'Laporan Laba Rugi')
+@section('title', 'Laporan Pengeluaran Kas')
 
 @section('content')
     <div class="container-fluid px-4">
-        <h1 class="mt-4">Laporan Laba Rugi</h1>
+        <h1 class="mt-4">Laporan Pengeluaran Kas</h1>
         <ol class="breadcrumb mb-4">
             <li class="breadcrumb-item"><a href="{{ route('dashboard') }}">Dashboard</a></li>
-            <li class="breadcrumb-item active">Laporan Laba Rugi</li>
+            <li class="breadcrumb-item active">Laporan Pengeluaran Kas</li>
         </ol>
 
         <!-- Form Pilihan Bulan dan Tahun -->
         <div class="card mb-4">
             <div class="card-body">
-                <form method="GET" action="{{ route('reports.income-statement') }}" id="report-form">
+                <form method="GET" action="{{ route('reports.cash-outflows') }}" id="report-form">
                     <div class="row">
                         <div class="col-md-3">
                             <label for="month">Bulan:</label>
@@ -40,12 +40,12 @@
             </div>
         </div>
 
-        <!-- Laporan Laba Rugi -->
+        <!-- Laporan Pengeluaran Kas -->
         <div class="card mb-4">
             <div class="card-header d-flex justify-content-between align-items-center">
                 <div class="text-center w-100">
                     <h5 class="mb-0">Telkom University</h5>
-                    <h5 class="mb-0">LAPORAN LABA RUGI</h5>
+                    <h5 class="mb-0">LAPORAN PENGELUARAN KAS</h5>
                     <h5 class="mb-0">Periode {{ \Carbon\Carbon::create($year, $month, 1)->format('F Y') }}</h5>
                 </div>
 
@@ -53,30 +53,21 @@
 
             <div class="card-body">
                 <div class="d-flex justify-content-end mb-3">
-                    <form action="{{ route('print.pdf.income.statement') }}" method="POST" target="_blank"
-                        class="d-inline">
+                    <form action="{{ route('print.pdf.cash.outflows') }}" method="POST" target="_blank" class="d-inline">
                         @csrf
                         <input type="hidden" name="month" value="{{ $month }}">
                         <input type="hidden" name="year" value="{{ $year }}">
-                        <input type="hidden" name="incomeDetails" value="{{ json_encode($incomeDetails) }}">
-                        <input type="hidden" name="productionCosts" value="{{ $productionCosts }}">
-                        <input type="hidden" name="grossProfit" value="{{ $grossProfit }}">
-                        <input type="hidden" name="expensesDetails" value="{{ json_encode($expensesDetails) }}">
-                        <input type="hidden" name="totalExpenses" value="{{ $totalExpenses }}">
-                        <input type="hidden" name="operationalNetProfit" value="{{ $operationalNetProfit }}">
-                        <input type="hidden" name="nonOperationalIncome" value="{{ json_encode($nonOperationalIncome) }}">
-                        <input type="hidden" name="totalNonOperationalIncome" value="{{ $totalNonOperationalIncome }}">
-                        <input type="hidden" name="netProfit" value="{{ $netProfit }}">
+                        <input type="hidden" name="totalCashOutflow" value="{{ $totalCashOutflow }}">
+                        <input type="hidden" name="cashOutflows" value="{{ json_encode($cashOutflows) }}">
                         <button type="submit" class="btn btn-outline-primary me-2">
                             <i class="fas fa-file-pdf me-1"></i> Print PDF
                         </button>
                     </form>
-
                     <a id="onDev" class="btn btn-outline-success">
                         <i class="fas fa-file-excel me-1"></i> Print Excel
                     </a>
                 </div>
-                @include('umkm.reports.partials.income-statement-tabel')
+                @include('umkm.reports.partials.cash-outflows-tabel')
             </div>
 
 

@@ -82,7 +82,7 @@
                         data-bs-parent="#sidenavAccordion">
                         <nav class="sb-sidenav-menu-nested nav">
 
-                            <a class="nav-link" href="#">
+                            <a class="nav-link" id="onDev">
                                 <div class="sb-nav-link-icon">
                                     <i class="fas fa-shopping-cart"></i> <!-- Ikon untuk Penjualan -->
                                 </div>
@@ -102,21 +102,21 @@
                         data-bs-parent="#sidenavAccordion">
                         <nav class="sb-sidenav-menu-nested nav">
 
-                            <a class="nav-link" href="#">
+                            <a class="nav-link" href="{{ route('reports.sales-report') }}">
                                 <div class="sb-nav-link-icon">
                                     <i class="fas fa-shopping-cart"></i> <!-- Ikon untuk Penjualan -->
                                 </div>
                                 Penjualan
                             </a>
 
-                            <a class="nav-link" href="#">
+                            <a class="nav-link" href="{{ route('reports.cash-inflows') }}">
                                 <div class="sb-nav-link-icon">
                                     <i class="fas fa-wallet"></i> <!-- Ikon untuk Penerimaan Kas -->
                                 </div>
                                 Penerimaan Kas
                             </a>
 
-                            <a class="nav-link" href="#">
+                            <a class="nav-link" href="{{ route('reports.cash-outflows') }}">
                                 <div class="sb-nav-link-icon">
                                     <i class="fas fa-hand-holding-usd"></i> <!-- Ikon untuk Pengeluaran Kas -->
                                 </div>
@@ -132,7 +132,7 @@
                                 Laba - Rugi
                             </a>
 
-                            <a class="nav-link" href="{{ route('reports.balance-sheet') }}">
+                            <a class="nav-link" id="onDev">
                                 <div class="sb-nav-link-icon">
                                     <i class="fas fa-balance-scale"></i> <!-- Ikon timbangan -->
                                 </div>

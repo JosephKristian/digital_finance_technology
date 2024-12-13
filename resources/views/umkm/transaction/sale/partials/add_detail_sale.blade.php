@@ -16,7 +16,7 @@
                     <select id="product_id" name="product_id" class="form-control" required>
                         <option value="">Pilih Nama Produk</option>
                         @foreach ($products as $product)
-                            <option value="{{ $product->id }}">
+                            <option value="{{ $product->id }}" data-stock="{{ $product->stock_quantity }}">
                                 {{ $product->name }} (Stok: {{ $product->stock_quantity }})
                             </option>
                         @endforeach
@@ -28,6 +28,8 @@
                     <label for="product_quantity" class="form-label">Jumlah Produk</label>
                     <input type="number" name="product_quantity" id="product_quantity" class="form-control"
                         min="1" required>
+                    <div id="quantity-error" class="text-danger" style="display: none;">Jumlah produk melebihi stok!
+                    </div>
                 </div>
 
                 <!-- Tombol Submit -->
@@ -56,4 +58,3 @@
         return true; // Form valid
     }
 </script>
-
