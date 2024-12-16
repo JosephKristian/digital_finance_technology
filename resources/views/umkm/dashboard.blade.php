@@ -27,32 +27,39 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
         // Data dummy untuk semua grafik
+        // Data yang dikirim dari backend
+        const dataFromBackend = @json($data);
+
+        // Transformasikan data ke dalam format yang dibutuhkan Chart.js
         const chartData = {
             sales: {
                 label: 'Total Penjualan',
-                data: [1200, 1500, 1800, 2000, 2400, 3000, 2500, 2700, 2900, 3200, 3500, 4000],
+                data: Object.values(dataFromBackend).map(item => item.sales), // Ambil nilai penjualan
                 backgroundColor: 'rgba(75, 192, 192, 0.5)',
                 borderColor: 'rgba(75, 192, 192, 1)',
             },
             revenue: {
                 label: 'Total Penerimaan',
-                data: [2000, 2300, 2500, 3000, 3500, 4000, 3800, 3700, 4200, 4500, 4800, 5000],
+                data: Object.values(dataFromBackend).map(item => item.revenue), // Ambil nilai penerimaan
                 backgroundColor: 'rgba(54, 162, 235, 0.5)',
                 borderColor: 'rgba(54, 162, 235, 1)',
             },
             expenses: {
                 label: 'Total Pengeluaran',
-                data: [800, 900, 1000, 1200, 1400, 1600, 1500, 1600, 1700, 1800, 1900, 2000],
+                data: Object.values(dataFromBackend).map(item => item.expenses), // Ambil nilai pengeluaran
                 backgroundColor: 'rgba(255, 99, 132, 0.5)',
                 borderColor: 'rgba(255, 99, 132, 1)',
             },
             profit: {
                 label: 'Keuntungan',
-                data: [1200, 1400, 1500, 1800, 2100, 2400, 2300, 2100, 2500, 2700, 2900, 3000],
+                data: Object.values(dataFromBackend).map(item => item.profit), // Ambil nilai keuntungan
                 backgroundColor: 'rgba(153, 102, 255, 0.5)',
                 borderColor: 'rgba(153, 102, 255, 1)',
             },
         };
+
+        // Debugging untuk memastikan data sudah sesuai
+        console.log(chartData);
 
         // Inisialisasi Chart.js
         const ctx = document.getElementById('dynamicChart').getContext('2d');
@@ -115,7 +122,7 @@
 
                                 // Atur langkah skala (stepSize) secara dinamis
                                 axis.ticks.stepSize = Math.ceil(maxData / 10 / 1000) *
-                                1000; // Contoh: jika max 45.000 -> stepSize = 5.000
+                                    1000; // Contoh: jika max 45.000 -> stepSize = 5.000
 
                                 // Usulkan nilai maksimum sedikit di atas nilai tertinggi data
                                 axis.suggestedMax = Math.ceil(maxData / axis.ticks.stepSize) * axis.ticks
@@ -133,7 +140,9 @@
             renderChart(this.value);
         });
 
-        // Render grafik pertama kali (default: Total Penjualan)
-        renderChart('sales');
+        document.addEventListener('DOMContentLoaded', function() {
+            // Render grafik pertama kali
+            renderChart('sales');
+        });
     </script>
 @endsection

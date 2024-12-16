@@ -26,13 +26,6 @@ window.addEventListener("DOMContentLoaded", (event) => {
     }
 });
 
-document.getElementById("onDev").addEventListener("click", function (event) {
-    event.preventDefault(); // Mencegah redirect default
-    alert(
-        "Fitur ini masih dalam tahap pengembangan, terima kasih sudah menunggu! 😊"
-    );
-});
-
 document.addEventListener("DOMContentLoaded", function () {
     const notification = document.getElementById("notification");
     if (notification) {

@@ -2,21 +2,19 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Umkm;
-use App\Http\Requests\StoreUmkmRequest;
-use App\Http\Requests\UpdateUmkmRequest;
+use Illuminate\Http\Request;
 
-class UmkmController extends Controller
+class AdminController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
     public function index()
     {
-        //
-        $umkms = Umkm::get();
-        dd($umkms);
-        return view('admin.umkms.index', compact('umkms'));
+        
+        // dd('hai');
+        return view('admin.dashboard');
+
     }
 
     /**
@@ -30,7 +28,7 @@ class UmkmController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(StoreUmkmRequest $request)
+    public function store(Request $request)
     {
         //
     }
@@ -38,7 +36,7 @@ class UmkmController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(Umkm $umkm)
+    public function show(string $id)
     {
         //
     }
@@ -46,7 +44,7 @@ class UmkmController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(Umkm $umkm)
+    public function edit(string $id)
     {
         //
     }
@@ -54,7 +52,7 @@ class UmkmController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(UpdateUmkmRequest $request, Umkm $umkm)
+    public function update(Request $request, string $id)
     {
         //
     }
@@ -62,7 +60,7 @@ class UmkmController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Umkm $umkm)
+    public function destroy(string $id)
     {
         //
     }

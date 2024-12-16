@@ -46,7 +46,7 @@
             </tbody>
             <tfoot>
                 <tr>
-                    <td colspan="4" class="text-right"><strong>Total</strong></td>
+                    <td colspan="5" class="text-right"><strong>Total</strong></td>
                     <td><strong>{{ number_format($total, 2) }}</strong></td>
                     <td></td> <!-- Kosongkan kolom aksi pada baris total -->
                 </tr>

@@ -2,7 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Customer;
+use App\Models\Journal;
 use App\Models\Token;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
@@ -21,18 +24,9 @@ class VerificationController extends Controller
     /**
      * Show the form for creating a new resource.
      */
-    public function umkm()
+    public function umkm(Request $request)
     {
-        $user = Auth::user();
-
-        // Ambil data UMKM terkait menggunakan relasi
-        $umkmData = $user->umkm;
-
-        // Simpan status approve ke session
-        session(['umkm_approve' => $umkmData->approve]);
-
-        // Kirim data UMKM ke view
-        return view('umkm.dashboard', ['umkm' => $umkmData]);
+        return redirect()->route('dashboard-umkm');
     }
 
     // Method untuk memverifikasi UMKM dengan token
@@ -66,7 +60,7 @@ class VerificationController extends Controller
             session(['umkm_approve' => $umkmData->approve]);
 
             // Kirim data UMKM ke view
-            return view('umkm.dashboard', ['umkm' => $umkmData])->with('success', 'Selamat anda berhasil melakukan verifikasi');
+            return redirect()->route('dashboard-umkm');
         } else {
             // Token tidak valid atau sudah kedaluwarsa
             Log::error('Token tidak valid atau sudah kedaluwarsa');
@@ -108,7 +102,7 @@ class VerificationController extends Controller
             session(['umkm_approve' => $umkm->approve]);
 
             // Kirim data UMKM ke view
-            return view('umkm.dashboard', ['umkm' => $umkm])->with('success', 'Verifikasi UMKM berhasil diajukan. Harap menunggu proses persetujuan.');
+            return redirect()->route('dashboard-umkm');
         } catch (\Exception $e) {
             // Log error
             Log::error('Gagal memproses verifikasi UMKM', [

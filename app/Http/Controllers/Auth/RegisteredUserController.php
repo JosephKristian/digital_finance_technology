@@ -46,7 +46,8 @@ class RegisteredUserController extends Controller
 
         $newUser = User::where('email', $user->email)->where('password', $user->password)
             ->first();
-        event(new Registered($user));
+        
+        event(new Registered($newUser));
 
 
         $userId = $newUser->getAttribute('id'); // Mengambil atribut 'id'

@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AdminController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DoccumentController;
@@ -8,7 +9,9 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\TransactionController;
 use App\Http\Controllers\OtherTransactionController;
 use App\Http\Controllers\ReportController;
+use App\Http\Controllers\UmkmController;
 use App\Http\Controllers\VerificationController;
+use App\Http\Middleware\EnsureUserHasRole;
 use Illuminate\Support\Facades\Route;
 
 // Welcome Route
@@ -16,10 +19,26 @@ Route::get('/', function () {
     return view('welcome');
 });
 
+
+
 // Authenticated Routes
-Route::middleware('auth')->group(function () {
+Route::middleware('auth', 'verified')->group(function () {
     // Dashboard
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+    Route::get('/dashboard-admin', [AdminController::class, 'index'])->name('dashboard-admin')->middleware(EnsureUserHasRole::class . ':admin');
+    Route::get('/dashboard-umkm', [DashboardController::class, 'verifiedUmkm'])->name('dashboard-umkm');
+
+
+    // Authenticated Routes
+    Route::middleware(EnsureUserHasRole::class . ':admin')->group(function () {
+        // SuperAdmin
+        Route::prefix('super-admin')->name('super-admin.')->group(function () {
+            Route::get('/', [UmkmController::class, 'index'])->name('umkm.index');
+            Route::patch('/', [ProfileController::class, 'update'])->name('update');
+            Route::delete('/', [ProfileController::class, 'destroy'])->name('destroy');
+        });
+    });
+
 
     // Profile
     Route::prefix('profile')->name('profile.')->group(function () {
