@@ -1,8 +1,8 @@
 @foreach ($data as $index => $umkm)
     <!-- Modal Hapus -->
     <div class="modal fade" id="deleteUmkmModal{{ $umkm['id'] }}" tabindex="-1"
-        aria-labelledby="deleteUmkmModalLabel{{ $umkm['id'] }}" aria-hidden="true">
-        <div class="modal-dialog">
+        aria-labelledby="deleteUmkmModalLabel{{ $umkm['id'] }}" aria-hidden="true" data-bs-backdrop="static">
+        <div class="modal-dialog modal-dialog-centered">
             <form action="{{ route('super-admin.umkm.destroy', ['id' => $umkm['id']]) }}" method="POST">
                 @csrf
                 @method('DELETE')

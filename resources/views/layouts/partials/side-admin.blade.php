@@ -23,13 +23,6 @@
                     </div>
                     Umkm
                 </a>
-
-                <a class="nav-link" href="{{ route('customers.index') }}">
-                    <div class="sb-nav-link-icon">
-                        <i class="fas fa-users"></i> <!-- Ikon untuk Pelanggan -->
-                    </div>
-                    Pelanggan
-                </a>
             </nav>
         </div>
 

@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AdminController;
+use App\Http\Controllers\CoaController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DoccumentController;
@@ -42,6 +43,20 @@ Route::middleware('auth', 'verified')->group(function () {
             Route::get('/umkm/pdf/{filename}', [UmkmController::class, 'showPDF'])->where('filename', '.*')->name('umkm.showPDF');
             Route::patch('/', [ProfileController::class, 'update'])->name('update');
             Route::delete('/', [ProfileController::class, 'destroy'])->name('destroy');
+
+            Route::prefix('umkm/{umkm_id}/coa')->name('coa.')->group(function () {
+                Route::get('/', [CoaController::class, 'index'])->name('index');
+                Route::get('/create', [CoaController::class, 'create'])->name('create');
+                Route::post('/', [CoaController::class, 'store'])->name('store');
+                Route::get('/{id}/edit', [CoaController::class, 'edit'])->name('edit');
+                Route::put('/{id}', [CoaController::class, 'update'])->name('update');
+                Route::delete('/{id}', [CoaController::class, 'destroy'])->name('destroy');
+                Route::get('/coa-sub/{coaTypeId}', [CoaController::class, 'getCoaSub'])->name('sub');
+                Route::get('/generate-account-code', [CoaController::class, 'generateAccountCode']);
+
+            });
+
+           
         });
 
 

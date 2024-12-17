@@ -1,8 +1,8 @@
 @foreach ($data as $index => $umkm)
     <!-- Modal Approve -->
     <div class="modal fade" id="approveUmkmModal{{ $umkm['id'] }}" tabindex="-1"
-        aria-labelledby="approveUmkmModalLabel{{ $umkm['id'] }}" aria-hidden="true">
-        <div class="modal-dialog">
+        aria-labelledby="approveUmkmModalLabel{{ $umkm['id'] }}" aria-hidden="true" data-bs-backdrop="static">
+        <div class="modal-dialog modal-dialog-centered">
             <form action="{{ route('super-admin.umkm.approve', ['id' => $umkm['id']]) }}" method="POST">
                 @csrf
                 @method('PUT')
