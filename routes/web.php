@@ -9,6 +9,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\TransactionController;
 use App\Http\Controllers\OtherTransactionController;
 use App\Http\Controllers\ReportController;
+use App\Http\Controllers\TokenController;
 use App\Http\Controllers\UmkmController;
 use App\Http\Controllers\VerificationController;
 use App\Http\Middleware\EnsureUserHasRole;
@@ -18,6 +19,7 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', function () {
     return view('welcome');
 });
+
 
 
 
@@ -34,8 +36,22 @@ Route::middleware('auth', 'verified')->group(function () {
         // SuperAdmin
         Route::prefix('super-admin')->name('super-admin.')->group(function () {
             Route::get('/', [UmkmController::class, 'index'])->name('umkm.index');
+            Route::put('/umkm/{id}', [UmkmController::class, 'update'])->name('umkm.update');
+            Route::put('/umkm/approve/{id}', [UmkmController::class, 'approve'])->name('umkm.approve');
+            Route::delete('/umkm/{id}', [UmkmController::class, 'destroy'])->name('umkm.destroy');
+            Route::get('/umkm/pdf/{filename}', [UmkmController::class, 'showPDF'])->where('filename', '.*')->name('umkm.showPDF');
             Route::patch('/', [ProfileController::class, 'update'])->name('update');
             Route::delete('/', [ProfileController::class, 'destroy'])->name('destroy');
+        });
+
+
+
+        // Products
+        Route::prefix('tokens')->name('token.')->group(function () {
+            Route::get('/', [TokenController::class, 'index'])->name('index');
+            Route::post('/', [TokenController::class, 'store'])->name('store');
+            Route::put('/{id}', [TokenController::class, 'update'])->name('update');
+            Route::delete('/{id}', [TokenController::class, 'destroy'])->name('destroy');
         });
     });
 

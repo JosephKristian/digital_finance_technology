@@ -64,7 +64,7 @@ class CustomerController extends Controller
             
         $customer->update($request->all());
 
-        return redirect()->back()->with('success', 'Customer ' . $request->name . ' updated successfully!');
+        return redirect()->back()->with('success', 'Pelanggan ' . $request->name . ' berhasil diperbaharui!');
     }
 
     // Menghapus pelanggan
@@ -78,6 +78,6 @@ class CustomerController extends Controller
         $customerName = $customer->name;
         $customer->delete();
 
-        return redirect()->back()->with('success', 'Customer ' . $customerName . ' deleted successfully!');
+        return redirect()->back()->with('success', 'Pelanggan ' . $customerName . ' berhasil dihapus!');
     }
 }

@@ -1,7 +1,6 @@
 <!-- Navbar Brand-->
 <a class="navbar-brand ps-3" href="#">D I G I F I N T E C H</a>
-<a class="navbar-brand ps-3" href="#">{{ session('error') }}</a>
-<a class="navbar-brand ps-3" href="#">{{ session('success') }}</a>
+
 <!-- Sidebar Toggle-->
 <button class="btn btn-link btn-sm order-1 order-lg-0 me-4 me-lg-0" id="sidebarToggle" href="#!"><i
         class="fas fa-bars"></i></button>
