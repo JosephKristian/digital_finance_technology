@@ -1,13 +1,18 @@
 <?php
 
+use App\Http\Controllers\AdminController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\DoccumentController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\TransactionController;
 use App\Http\Controllers\OtherTransactionController;
 use App\Http\Controllers\ReportController;
+use App\Http\Controllers\TokenController;
+use App\Http\Controllers\UmkmController;
 use App\Http\Controllers\VerificationController;
+use App\Http\Middleware\EnsureUserHasRole;
 use Illuminate\Support\Facades\Route;
 
 // Welcome Route
@@ -15,10 +20,41 @@ Route::get('/', function () {
     return view('welcome');
 });
 
+
+
+
 // Authenticated Routes
-Route::middleware('auth')->group(function () {
+Route::middleware('auth', 'verified')->group(function () {
     // Dashboard
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+    Route::get('/dashboard-admin', [AdminController::class, 'index'])->name('dashboard-admin')->middleware(EnsureUserHasRole::class . ':admin');
+    Route::get('/dashboard-umkm', [DashboardController::class, 'verifiedUmkm'])->name('dashboard-umkm');
+
+
+    // Authenticated Routes
+    Route::middleware(EnsureUserHasRole::class . ':admin')->group(function () {
+        // SuperAdmin
+        Route::prefix('super-admin')->name('super-admin.')->group(function () {
+            Route::get('/', [UmkmController::class, 'index'])->name('umkm.index');
+            Route::put('/umkm/{id}', [UmkmController::class, 'update'])->name('umkm.update');
+            Route::put('/umkm/approve/{id}', [UmkmController::class, 'approve'])->name('umkm.approve');
+            Route::delete('/umkm/{id}', [UmkmController::class, 'destroy'])->name('umkm.destroy');
+            Route::get('/umkm/pdf/{filename}', [UmkmController::class, 'showPDF'])->where('filename', '.*')->name('umkm.showPDF');
+            Route::patch('/', [ProfileController::class, 'update'])->name('update');
+            Route::delete('/', [ProfileController::class, 'destroy'])->name('destroy');
+        });
+
+
+
+        // Products
+        Route::prefix('tokens')->name('token.')->group(function () {
+            Route::get('/', [TokenController::class, 'index'])->name('index');
+            Route::post('/', [TokenController::class, 'store'])->name('store');
+            Route::put('/{id}', [TokenController::class, 'update'])->name('update');
+            Route::delete('/{id}', [TokenController::class, 'destroy'])->name('destroy');
+        });
+    });
+
 
     // Profile
     Route::prefix('profile')->name('profile.')->group(function () {
@@ -73,6 +109,8 @@ Route::middleware('auth')->group(function () {
         Route::get('/income-statement', [ReportController::class, 'incomeStatement'])->name('income-statement');
         Route::get('/balance-sheet', [ReportController::class, 'balanceSheet'])->name('balance-sheet');
         Route::get('/sales-report', [ReportController::class, 'salesReport'])->name('sales-report');
+        Route::get('/cash-inflows', [ReportController::class, 'cashInflows'])->name('cash-inflows');
+        Route::get('/cash-outflows', [ReportController::class, 'cashOutflows'])->name('cash-outflows');
     });
 
     // // Accounting
@@ -80,7 +118,18 @@ Route::middleware('auth')->group(function () {
     //     Route::get('/general-ledger', [ReportController::class, 'incomeStatement'])->name('general-ledger');
     //     Route::get('/balance-sheet', [ReportController::class, 'balanceSheet'])->name('balance-sheet');
     // });
-    
+
+    Route::post('/print-pdf/income-statement', [DoccumentController::class, 'printPDFIncomeStatement'])->name('print.pdf.income.statement');
+    Route::post('/print-excel/income-statement', [DoccumentController::class, 'printExcelIncomeStatement'])->name('print.excel.income.statement');
+
+    Route::post('/print-pdf/cash-inflows', [DoccumentController::class, 'printPDFCashInflows'])->name('print.pdf.cash.inflows');
+    Route::post('/print-excel/cash-inflows', [DoccumentController::class, 'printExcelCashInflows'])->name('print.excel.cash.inflows');
+
+    Route::post('/print-pdf/cash-outflows', [DoccumentController::class, 'printPDFCashOutflows'])->name('print.pdf.cash.outflows');
+    Route::post('/print-excel/cash-outflows', [DoccumentController::class, 'printExcelCashOutflows'])->name('print.excel.cash.outflows');
+
+    Route::post('/print-pdf/sales-report', [DoccumentController::class, 'printPDFSalesReport'])->name('print.pdf.sales.report');
+    Route::post('/print-excel/sales-report', [DoccumentController::class, 'printExcelSalesReport'])->name('print.excel.sales.report');
 });
 
 require __DIR__ . '/auth.php';

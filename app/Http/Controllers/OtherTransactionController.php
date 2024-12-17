@@ -12,6 +12,7 @@ use App\Models\Transaction;
 use App\Models\Umkm;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
 class OtherTransactionController extends Controller
@@ -63,9 +64,11 @@ class OtherTransactionController extends Controller
         $umkm = Umkm::where('user_id', Auth::user()->id)->firstOrFail();
         $transactionId = 'OTR-' . date('Ymd') . substr(uniqid('', true), -4);
         $uuidTransaction = Str::uuid();
+        // Aktifkan query log
+        DB::enableQueryLog();
 
         // Simpan transaksi
-        Transaction::create([
+        $transaction = Transaction::create([
             'id' => $uuidTransaction,
             'umkm_id' => $umkm->id,
             'transaction_id' => $transactionId,
@@ -74,6 +77,31 @@ class OtherTransactionController extends Controller
             'information' => $request->keterangan,
             'status' => true,
         ]);
+
+        // Log data transaksi
+        Log::info('Transaksi berhasil disimpan', [
+            'id' => $uuidTransaction,
+            'umkm_id' => $umkm->id,
+            'transaction_id' => $transactionId,
+            'transaction_date' => $request->tanggalTransaksi,
+            'total_amount' => $request->nominal,
+            'information' => $request->keterangan,
+            'status' => true,
+        ]);
+
+        // Ambil query log
+        $queries = DB::getQueryLog();
+
+        // Log query yang dijalankan
+        foreach ($queries as $query) {
+            Log::info('Query executed', [
+                'query' => $query['query'],
+                'bindings' => $query['bindings'],
+                'time' => $query['time']
+            ]);
+        }
+
+
 
         $transactionCategory = $request->kategori == 'income' ? 'Penerimaan' : 'Pengeluaran';
 

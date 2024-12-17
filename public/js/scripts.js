@@ -45,10 +45,9 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 });
 
-document.addEventListener('hide.bs.collapse', function (event) {
-    console.log('Accordion ditutup:', event.target);
+document.addEventListener("hide.bs.collapse", function (event) {
+    console.log("Accordion ditutup:", event.target);
 });
-document.addEventListener('show.bs.collapse', function (event) {
-    console.log('Accordion dibuka:', event.target);
+document.addEventListener("show.bs.collapse", function (event) {
+    console.log("Accordion dibuka:", event.target);
 });
-

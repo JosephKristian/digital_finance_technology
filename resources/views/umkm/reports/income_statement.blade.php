@@ -45,7 +45,7 @@
             <div class="card-header d-flex justify-content-between align-items-center">
                 <div class="text-center w-100">
                     <h5 class="mb-0">Telkom University</h5>
-                    <h5 class="mb-0">JURNAL UMUM</h5>
+                    <h5 class="mb-0">LAPORAN LABA RUGI</h5>
                     <h5 class="mb-0">Periode {{ \Carbon\Carbon::create($year, $month, 1)->format('F Y') }}</h5>
                 </div>
 
@@ -53,10 +53,26 @@
 
             <div class="card-body">
                 <div class="d-flex justify-content-end mb-3">
-                    <a href="#" class="btn btn-outline-primary me-2">
-                        <i class="fas fa-file-pdf me-1"></i> Print PDF
-                    </a>
-                    <a href="#" class="btn btn-outline-success">
+                    <form action="{{ route('print.pdf.income.statement') }}" method="POST" target="_blank"
+                        class="d-inline">
+                        @csrf
+                        <input type="hidden" name="month" value="{{ $month }}">
+                        <input type="hidden" name="year" value="{{ $year }}">
+                        <input type="hidden" name="incomeDetails" value="{{ json_encode($incomeDetails) }}">
+                        <input type="hidden" name="productionCosts" value="{{ $productionCosts }}">
+                        <input type="hidden" name="grossProfit" value="{{ $grossProfit }}">
+                        <input type="hidden" name="expensesDetails" value="{{ json_encode($expensesDetails) }}">
+                        <input type="hidden" name="totalExpenses" value="{{ $totalExpenses }}">
+                        <input type="hidden" name="operationalNetProfit" value="{{ $operationalNetProfit }}">
+                        <input type="hidden" name="nonOperationalIncome" value="{{ json_encode($nonOperationalIncome) }}">
+                        <input type="hidden" name="totalNonOperationalIncome" value="{{ $totalNonOperationalIncome }}">
+                        <input type="hidden" name="netProfit" value="{{ $netProfit }}">
+                        <button type="submit" class="btn btn-outline-primary me-2">
+                            <i class="fas fa-file-pdf me-1"></i> Print PDF
+                        </button>
+                    </form>
+
+                    <a id="onDev" class="btn btn-outline-success">
                         <i class="fas fa-file-excel me-1"></i> Print Excel
                     </a>
                 </div>

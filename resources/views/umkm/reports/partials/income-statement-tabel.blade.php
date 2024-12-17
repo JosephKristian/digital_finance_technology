@@ -7,16 +7,16 @@
         </tr>
         @foreach ($incomeDetails as $income)
             <tr>
+                <td></td>
                 <td class="ps-4">{{ $income->coa->account_name }}</td>
                 <td>Rp {{ number_format($income->total_amount, 0, ',', '.') }}</td>
-                <td></td>
                 <td></td>
             </tr>
         @endforeach
         <tr>
+            <td></td>
             <td class="ps-4">Biaya Produksi</td>
             <td>Rp - {{ number_format($productionCosts, 0, ',', '.') }}</td>
-            <td></td>
             <td></td>
         </tr>
         <tr>
@@ -31,9 +31,9 @@
         </tr>
         @foreach ($expensesDetails as $expense)
             <tr>
+                <td></td>
                 <td class="ps-4">{{ $expense->coa->account_name }}</td>
                 <td>Rp {{ number_format($expense->total_amount, 0, ',', '.') }}</td>
-                <td></td>
                 <td></td>
             </tr>
         @endforeach
@@ -55,9 +55,9 @@
         </tr>
         @foreach ($nonOperationalIncome as $nopIncome)
         <tr>
+            <td></td>
             <td class="ps-4">{{ $nopIncome->coa->account }}</td>
             <td>Rp {{ number_format($nopIncome->total_amount, 0, ',', '.') }}</td>
-            <td></td>
             <td></td>
         </tr>
         @endforeach

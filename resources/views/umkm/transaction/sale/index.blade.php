@@ -7,7 +7,8 @@
         <h1 class="mt-4">Daftar Transaksi</h1>
         <ol class="breadcrumb mb-4">
             <li class="breadcrumb-item"><a href="{{ route('dashboard') }}">Dashboard</a></li>
-            <li class="breadcrumb-item"><a href="#"data-bs-toggle="collapse" data-bs-target="#transaksiSideBar">Transaksi</a></li>
+            <li class="breadcrumb-item"><a href="#"data-bs-toggle="collapse"
+                    data-bs-target="#transaksiSideBar">Transaksi</a></li>
             <li class="breadcrumb-item active">Penjualan</li>
         </ol>
 
@@ -67,6 +68,28 @@
                 // Submit form jika sudah memilih metode pembayaran
                 document.getElementById('completeTransactionForm').submit();
             });
+            
+            const productSelect = document.getElementById('product_id');
+            const quantityInput = document.getElementById('product_quantity');
+            const errorDiv = document.getElementById('quantity-error');
+
+            productSelect.addEventListener('change', function() {
+                // Reset quantity input and error message when product changes
+                quantityInput.value = '';
+                errorDiv.style.display = 'none';
+            });
+
+            quantityInput.addEventListener('input', function() {
+                const selectedOption = productSelect.options[productSelect.selectedIndex];
+                const maxStock = selectedOption.dataset.stock;
+
+                if (maxStock && this.value > maxStock) {
+                    errorDiv.style.display = 'block';
+                    this.value = maxStock; // Optional: Reset to max value
+                } else {
+                    errorDiv.style.display = 'none';
+                }
+            });
         </script>
 
 
@@ -108,7 +131,7 @@
                     $('#paymentModal').modal('show'); // Menampilkan modal dengan ID "paymentModal"
                 });
 
-            
+
 
 
             });

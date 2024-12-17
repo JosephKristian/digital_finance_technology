@@ -3,7 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Models\Journal;
+use App\Models\Transaction;
 use App\Models\Umkm;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
@@ -247,9 +249,151 @@ class ReportController extends Controller
     }
 
 
-    public function salesReport(Request $request) {
+    public function salesReport(Request $request)
+    {
 
+        $umkm = Umkm::where('user_id', Auth::user()->id)->firstOrFail();
+        // dd($request->month,$request->year);
+        // Validasi input bulan dan tahun
+        $validated = $request->validate([
+            'month' => 'nullable|integer|min:1|max:12',
+            'year' => 'nullable|integer|min:2000|max:' . date('Y'),
+        ]);
+
+        // Ambil periode (default: bulan dan tahun saat ini)
+        $month = $validated['month'] ?? date('m');
+        $year = $validated['year'] ?? date('Y');
+
+        // Format tanggal untuk filter
+        $startDate = Carbon::createFromFormat('Y-m-d', "{$year}-{$month}-01")->startOfMonth();
+        $endDate = Carbon::createFromFormat('Y-m-d', "{$year}-{$month}-01")->endOfMonth();
+
+        // Jalankan query menggunakan Query Builder
+        $transactions = DB::table('transactions as t')
+            ->join('transaction_details as td', 't.transaction_id', '=', 'td.transaction_id')
+            ->join('products as p', 'td.product_id', '=', 'p.id')
+            ->where('t.umkm_id', $umkm->id)
+            ->where('t.status', true)
+            ->whereBetween('t.transaction_date', [$startDate, $endDate])
+            ->select(
+
+                'td.product_id',
+                DB::raw('SUM(td.quantity) as quantity'),
+                'p.name as product_name'
+            )
+            ->groupBy('t.transaction_date', 'td.product_id', 'p.name')
+            ->get();
+
+
+        return view('umkm.reports.sales_report', compact(
+            'month',
+            'year',
+            'transactions',
+        ));
     }
+
+
+    public function cashInflows(Request $request)
+    {
+        $umkm = Umkm::where('user_id', Auth::user()->id)->firstOrFail();
+        // dd($request->month,$request->year);
+        // Validasi input bulan dan tahun
+        $validated = $request->validate([
+            'month' => 'nullable|integer|min:1|max:12',
+            'year' => 'nullable|integer|min:2000|max:' . date('Y'),
+        ]);
+
+        // Ambil periode (default: bulan dan tahun saat ini)
+        $month = $validated['month'] ?? date('m');
+        $year = $validated['year'] ?? date('Y');
+
+        // Format tanggal untuk filter
+        $startDate = Carbon::createFromFormat('Y-m-d', "{$year}-{$month}-01")->startOfMonth();
+        $endDate = Carbon::createFromFormat('Y-m-d', "{$year}-{$month}-01")->endOfMonth();
+
+        $cashInflows = Journal::where('journals.umkm_id', $umkm->id)
+            ->where('type', 'credit') // Kredit menunjukkan pemasukan
+            ->whereHas('coa.coaSub', function ($query) {
+                $query->where('coa_type_id', 4); // Hanya tipe revenue
+            })
+            ->whereHas('transaction', function ($query) use ($startDate, $endDate) {
+                $query->whereBetween('transaction_date', [$startDate, $endDate]);
+            })
+            ->select('coa_id', DB::raw('DATE(transactions.transaction_date) as transaction_date'), DB::raw('SUM(amount) as total_amount'))
+            ->join('transactions', 'journals.transaction_id', '=', 'transactions.id') // Gabungkan dengan tabel transaksi
+            ->with('coa.coaSub')
+            ->groupBy('coa_id', 'transactions.transaction_id', 'transactions.transaction_date') // Tambahkan transaction_date ke GROUP BY
+            ->orderBy('transactions.transaction_date', 'asc')
+            ->get()
+            ->map(function ($journal) {
+                return [
+                    'date' => $journal->transaction_date,
+                    'account_name' => $journal->coa->coaSub->account_name ?? $journal->coa->account_name,
+                    'total_amount' => $journal->total_amount,
+                ];
+            });
+
+        // Mendapatkan total semua pemasukan
+        $totalCashInflow = $cashInflows->sum('total_amount');
+
+
+
+        // dd($cashInflows);
+        return view('umkm.reports.cash_inflows', compact('cashInflows', 'totalCashInflow', 'month', 'year'));
+    }
+    public function cashOutflows(Request $request)
+    {
+
+        $umkm = Umkm::where('user_id', Auth::user()->id)->firstOrFail();
+        // dd($request->month,$request->year);
+        // Validasi input bulan dan tahun
+        $validated = $request->validate([
+            'month' => 'nullable|integer|min:1|max:12',
+            'year' => 'nullable|integer|min:2000|max:' . date('Y'),
+        ]);
+
+        // Ambil periode (default: bulan dan tahun saat ini)
+        $month = $validated['month'] ?? date('m');
+        $year = $validated['year'] ?? date('Y');
+
+        // Format tanggal untuk filter
+        $startDate = Carbon::createFromFormat('Y-m-d', "{$year}-{$month}-01")->startOfMonth();
+        $endDate = Carbon::createFromFormat('Y-m-d', "{$year}-{$month}-01")->endOfMonth();
+
+        $cashOutflows = Journal::where('journals.umkm_id', $umkm->id)
+            ->where('type', 'debit') // Kredit menunjukkan pemasukan
+            ->whereHas('coa.coaSub', function ($query) {
+                $query->where('coa_type_id', 5) // Hanya tipe expense
+                    ->where('sub_name', '<>', 'Cost of Goods Sold'); // Exclude COGS
+            })
+            ->whereHas('transaction', function ($query) use ($startDate, $endDate) {
+                $query->whereBetween('transaction_date', [$startDate, $endDate]);
+            })
+            ->select('coa_id', DB::raw('DATE(transactions.transaction_date) as transaction_date'), DB::raw('SUM(amount) as total_amount'))
+            ->join('transactions', 'journals.transaction_id', '=', 'transactions.id') // Gabungkan dengan tabel transaksi
+            ->with('coa.coaSub')
+            ->groupBy('coa_id', 'transactions.transaction_id', 'transactions.transaction_date') // Tambahkan transaction_date ke GROUP BY
+            ->orderBy('transactions.transaction_date', 'asc')
+            ->get()
+            ->map(function ($journal) {
+                return [
+                    'date' => $journal->transaction_date,
+                    'account_name' => $journal->coa->coaSub->account_name ?? $journal->coa->account_name,
+                    'total_amount' => $journal->total_amount,
+                ];
+            });
+        // Mendapatkan total semua pemasukan
+        $totalCashOutflow = $cashOutflows->sum('total_amount');
+
+        return view('umkm.reports.cash_outflows', compact(
+            'cashOutflows',
+            'totalCashOutflow',
+            'month',
+            'year',
+        ));
+    }
+
+ 
 
 
     // public function balanceSheet(Request $request)
