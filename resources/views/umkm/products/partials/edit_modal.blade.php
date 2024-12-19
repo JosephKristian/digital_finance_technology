@@ -18,7 +18,7 @@
                     <!-- Input Harga Beli -->
                     <div class="mb-3">
                         <label for="purchase_price" class="form-label">Harga Beli</label>
-                        <input type="number" name="purchase_price" id="purchase_price" class="form-control" value="{{ $product->purchase_price }}" required>
+                        <input type="number" name="purchase_price" id="purchase_price" class="form-control" value="{{ $product->purchase_price }}" disabled>
                     </div>
 
                     <!-- Input Harga Jual -->
@@ -30,7 +30,7 @@
                     <!-- Input Stok -->
                     <div class="mb-3">
                         <label for="stock_quantity" class="form-label">Stok</label>
-                        <input type="number" name="stock_quantity" id="stock_quantity" class="form-control" value="{{ $product->stock_quantity }}" required>
+                        <input type="number" name="stock_quantity" id="stock_quantity" class="form-control" value="{{ $product->stock_quantity }}" disabled>
                     </div>
 
                     <!-- Input Status -->

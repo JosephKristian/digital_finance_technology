@@ -8,8 +8,6 @@
         {{-- // Menampilkan modal jika session umkm_approve bernilai false --}}
         @if (session('umkm_approve') == 1)
             <h1 class="h3 mb-4 text-gray-800">Selamat Datang, {{ Auth::user()->name }}!</h1>
-            <p class="text-muted">Kami senang Anda bergabung dengan kami. Jelajahi dashboard Anda dan kelola data Anda dengan
-                efisien.</p>
 
             @include('umkm.partials.cards')
             @include('umkm.partials.chart')

@@ -37,4 +37,9 @@ class Transaction extends Model
     {
         return $this->belongsTo(UMKM::class);
     }
+
+    public function journals()
+    {
+        return $this->hasMany(Journal::class, 'transaction_id');
+    }
 }

@@ -76,7 +76,7 @@
                 data-bs-parent="#sidenavAccordion">
                 <nav class="sb-sidenav-menu-nested nav">
 
-                    <a class="nav-link" id="onDev">
+                    <a class="nav-link" href="{{ route('accounting.general-ledger') }}">
                         <div class="sb-nav-link-icon">
                             <i class="fas fa-shopping-cart"></i> <!-- Ikon untuk Penjualan -->
                         </div>
@@ -126,12 +126,12 @@
                         Laba - Rugi
                     </a>
 
-                    <a class="nav-link" id="onDev">
+                    {{-- <a class="nav-link" id="onDev">
                         <div class="sb-nav-link-icon">
                             <i class="fas fa-balance-scale"></i> <!-- Ikon timbangan -->
                         </div>
                         Neraca Saldo
-                    </a>
+                    </a> --}}
 
 
                 </nav>

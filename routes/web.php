@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AccountingController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\CoaController;
 use App\Http\Controllers\CustomerController;
@@ -128,11 +129,13 @@ Route::middleware('auth', 'verified')->group(function () {
         Route::get('/cash-outflows', [ReportController::class, 'cashOutflows'])->name('cash-outflows');
     });
 
-    // // Accounting
-    // Route::prefix('accounting')->name('accounting.')->group(function () {
-    //     Route::get('/general-ledger', [ReportController::class, 'incomeStatement'])->name('general-ledger');
-    //     Route::get('/balance-sheet', [ReportController::class, 'balanceSheet'])->name('balance-sheet');
-    // });
+    // Accounting
+    Route::prefix('accounting')->name('accounting.')->group(function () {
+        Route::get('/general-ledger', [AccountingController::class, 'generalLedger'])->name('general-ledger');
+        // Route::get('/balance-sheet', [ReportController::class, 'balanceSheet'])->name('balance-sheet');
+    });
+
+    Route::post('/print-pdf/general-ledger', [DoccumentController::class, 'printPDFGeneralLedger'])->name('print.pdf.general.ledger');
 
     Route::post('/print-pdf/income-statement', [DoccumentController::class, 'printPDFIncomeStatement'])->name('print.pdf.income.statement');
     Route::post('/print-excel/income-statement', [DoccumentController::class, 'printExcelIncomeStatement'])->name('print.excel.income.statement');

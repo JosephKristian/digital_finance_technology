@@ -47,13 +47,17 @@ class AuthController extends Controller
             'password' => Hash::make($request->password),
         ]);
 
+        $newUser = User::where('email', $user->email)->where('password', $user->password)
+            ->first();
+
         // Trigger event pendaftaran
-        event(new Registered($user));
+        event(new Registered($newUser));
+        $newUser->sendEmailVerificationNotification();
 
         // Membuat UMKM default untuk user
         $umkm = Umkm::create([
             'id' => (string) \Illuminate\Support\Str::uuid(),
-            'user_id' => $user->id,
+            'user_id' => $newUser->id,
             'name' => '', // Nilai default
             'address' => '', // Nilai default
             'phone' => '', // Nilai default
@@ -67,13 +71,17 @@ class AuthController extends Controller
         return response()->json([
             'status' => 'success',
             'data' => [
-                'user' => $user,
+                'user' => [
+                    'id' => $newUser->id,
+                    'name' => $newUser->name,
+                    'email' => $newUser->email,
+                ],
                 'umkm' => [
                     'id' => $umkm->id,
                     'approve' => $umkm->approve,
                 ],
             ],
-            'message' => 'User berhasil didaftarkan'
+            'message' => 'User berhasil didaftarkan. Silakan verifikasi email Anda terlebih dahulu dengan memeriksa inbox atau folder spam.',
         ], 201);
     }
 
@@ -120,21 +128,25 @@ class AuthController extends Controller
         Auth::login($user);
 
         // Generate token Sanctum
-        $token = $user->createToken('YourAppName')->plainTextToken;
+        $token = $user->createToken('digital_financial_technology')->plainTextToken;
 
         $umkm = Umkm::where('user_id', $user->id)->first();
 
         return response()->json([
             'status' => 'success',
             'data' => [
-                'user' => $user,
-                'umkm' => [
-                    'approve' => $umkm->approve ?? false,
+                'user' => [
+                    'id' => $user->id,
+                    'name' => $user->name,
+                    'email' => $user->email,
                 ],
-                'token' => $token  // Menambahkan token di sini
+                'umkm' => [
+                    'id' => $umkm->id,
+                    'approve' => $umkm->approve,
+                ],
             ],
-            'message' => 'Login berhasil'
-        ], 200);
+            'message' => 'User berhasil login !!',
+        ], 201)->header('Authorization', "Bearer $token");
     }
 
 
@@ -216,14 +228,15 @@ class AuthController extends Controller
         ], 500);
     }
 
-    public function profile(){
+    public function profile()
+    {
         $user = auth()->user();
         return response()->json([
-            'status'=> true,
-            'message'=> 'Profile',
-            'data'=> $user,
-            'id'=> auth()->user()->id,
-        ],200);
+            'status' => true,
+            'message' => 'Profile',
+            'data' => $user,
+            'id' => auth()->user()->id,
+        ], 200);
     }
 
     public function logout(Request $request)

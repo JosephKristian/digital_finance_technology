@@ -4,14 +4,14 @@
 
 @section('content')
 <div class="container-fluid">
-    <div class="text-center mb-4">
+    <div class="text-center mb-4 fade-in">
         <h1 class="mt-4 display-4">Selamat Datang di Aplikasi Digital Finance!</h1>
         <p class="lead">
             Kami sangat senang Anda bergabung dengan kami! Aplikasi Digital Finance dirancang khusus untuk membantu pengusaha UMKM seperti Anda dalam mengelola keuangan dengan lebih efisien dan efektif. Dengan fitur-fitur yang kami tawarkan, Anda dapat menyusun dan mengevaluasi keuangan usaha Anda dengan mudah.
         </p>
     </div>
 
-    <div class="card mb-4">
+    <div class="card mb-4 fade-in" style="animation-delay: 0.3s;">
         <div class="card-header">
             <h2 class="h5">Mengapa Memilih Aplikasi Kami?</h2>
         </div>
@@ -27,7 +27,7 @@
         </div>
     </div>
 
-    <div class="card mb-4">
+    <div class="card mb-4 fade-in" style="animation-delay: 0.6s;">
         <div class="card-header">
             <h2 class="h5">Fitur Unggulan Kami</h2>
         </div>
@@ -43,7 +43,7 @@
         </div>
     </div>
 
-    <div class="text-center mb-4">
+    <div class="text-center mb-4 fade-in" style="animation-delay: 0.9s;">
         <h2 class="h5">Mari Mulai Perjalanan Keuangan Anda!</h2>
         <p>
             Kami percaya bahwa dengan aplikasi ini, Anda akan dapat mengelola keuangan usaha Anda dengan lebih baik, sehingga Anda dapat fokus pada pengembangan bisnis Anda. Jika Anda memiliki pertanyaan atau membutuhkan bantuan, jangan ragu untuk menghubungi tim dukungan kami.

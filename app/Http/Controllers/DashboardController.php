@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\Customer;
 use App\Models\Journal;
+use App\Models\Product;
+use App\Models\Transaction;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -60,16 +62,20 @@ class DashboardController extends Controller
 
         // Expenses
         $expenses = Journal::where('journals.umkm_id', $umkmData->id)
-            ->where('type', 'debit') // Debit menunjukkan pengeluaran
+            ->where('type', 'credit') // Debit menunjukkan pengeluaran
             ->whereHas('coa.coaSub', function ($query) {
-                $query->where('coa_type_id', 5); // Tipe 5: Expenses
+                $query->where('coa_type_id', 1)
+                    ->where('sub_name', '<>', 'Cost of Goods Sold');; // Tipe 5: Expenses
             })
             ->whereYear('transactions.transaction_date', $year) // Filter berdasarkan tahun
             ->join('transactions', 'journals.transaction_id', '=', 'transactions.id')
             ->selectRaw('MONTH(transactions.transaction_date) as month, SUM(amount) as total_expenses')
             ->groupBy('month')
             ->pluck('total_expenses', 'month');
+
         $totalCustomers = Customer::where('umkm_id', $umkmData->id)->count();
+        $totalProducts = Product::where('umkm_id', $umkmData->id)->where('status', 'active')->count();
+        $totalTransactions = Transaction::where('umkm_id', $umkmData->id)->count();
         // Gabungkan semua data ke dalam satu struktur
         $data = collect(range(1, 12))->mapWithKeys(function ($month) use ($sales, $revenue, $expenses) {
             $totalSales = $sales->get($month, 0); // Default 0 jika tidak ada data
@@ -94,6 +100,12 @@ class DashboardController extends Controller
         // dd($data);
 
         // Kirim data UMKM ke view
-        return view('umkm.dashboard', compact('umkmData', 'data', 'totalCustomers'))->with('success', '😁 Selamat bergabung anda berhasil masuk! 😁');
+        return view('umkm.dashboard', compact(
+            'umkmData',
+            'data',
+            'totalCustomers',
+            'totalProducts',
+            'totalTransactions',
+        ))->with('success', '😁 Selamat bergabung anda berhasil masuk! 😁');
     }
 }
