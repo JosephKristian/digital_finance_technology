@@ -62,7 +62,7 @@ Route::middleware('auth', 'verified')->group(function () {
 
 
 
-        // Products
+        // tokens
         Route::prefix('tokens')->name('token.')->group(function () {
             Route::get('/', [TokenController::class, 'index'])->name('index');
             Route::post('/', [TokenController::class, 'store'])->name('store');

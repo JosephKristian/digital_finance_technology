@@ -40,8 +40,12 @@ class AccountingController extends Controller
             ->join('transactions', 'journals.transaction_id', '=', 'transactions.id') // Gabungkan dengan tabel transactions
             ->where('journals.umkm_id', $umkm->id)
             ->whereBetween('transactions.transaction_date', [$startDate, $endDate])
+              // Urutkan per transaksi
             ->orderBy('transactions.transaction_date', 'asc') // Urutkan berdasarkan tanggal transaksi
+            ->orderBy('journals.created_at', 'asc')  // Urutkan per transaksi
+            ->orderByRaw("CASE WHEN journals.type = 'debit' THEN 1 ELSE 2 END") // Debit dulu baru kredit
             ->get();
+
 
 
         return view('umkm.accounting.general-ledger', compact(

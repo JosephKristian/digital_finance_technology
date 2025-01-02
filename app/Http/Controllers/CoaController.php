@@ -6,6 +6,7 @@ use App\Models\Coa;
 use App\Models\CoaSub;
 use App\Models\CoaType;
 use App\Models\Umkm;
+use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 
@@ -154,30 +155,71 @@ class CoaController extends Controller
             Log::info('CoaSub found.', ['coa_sub' => $coaSub]);
 
             $coaTypeId = $request->coa_type_id;
+            $coaSubId = $request->coa_sub_id;
 
-            // Ambil nomor terakhir berdasarkan coa_sub dan coa_type
-            $lastAccount = Coa::where('coa_sub_id', $request->coa_sub_id)
+            // Daftar kode parent untuk tiap coa_sub_id
+            $parentCodes = [
+                1100, // Aktiva (coa_sub_id = 1)
+                1200, // Piutang (coa_sub_id = 2)
+                1300, // Persediaan (coa_sub_id = 3)
+                1400, // Pengeluaran Dibayar di Muka (coa_sub_id = 4)
+                1500, // Aktiva Tetap (coa_sub_id = 5)
+                1600, // Akumulasi Penyusutan (coa_sub_id = 6)
+                2000, // Pasiva (coa_sub_id = 7)
+                2100, // Hutang (coa_sub_id = 8)
+                2200, // Hutang Bank dan Institusi (coa_sub_id = 9)
+                3100, // Modal (coa_sub_id = 10)
+                4100, // Pendapatan (coa_sub_id = 11)
+                4200, // Diskon Penjualan (coa_sub_id = 12)
+                4300, // Retur Penjualan (coa_sub_id = 13)
+                5100, // HPP (coa_sub_id = 14)
+                5200, // Pembelian (coa_sub_id = 15)
+                5300, // Diskon Pembelian (coa_sub_id = 16)
+                5400, // Retur Pembelian (coa_sub_id = 17)
+                6100, // Beban Pengeluaran (coa_sub_id = 18)
+                7100, // Pendapatan Lain-lain (coa_sub_id = 19)
+                8000, // Beban Pengeluaran Lain-lain (coa_sub_id = 20)
+            ];
+
+            // Inisialisasi counter untuk setiap coa_sub_id
+            $counts = array_fill(0, count($parentCodes), 1);
+
+            // Ambil account_code terakhir dari database untuk coa_sub_id ini
+            $lastAccount = Coa::where('coa_sub_id', $coaSubId)
                 ->whereHas('coaSub', function ($query) use ($coaTypeId) {
                     $query->where('coa_type_id', $coaTypeId);
                 })
                 ->orderBy('account_code', 'desc')
                 ->first();
 
-            Log::info('Last account fetched.', [
-                'last_account' => $lastAccount ? $lastAccount->toArray() : null,
-            ]);
+            // Tentukan kode parent berdasarkan coa_sub_id
+            if (isset($parentCodes[$coaSubId - 1])) {
+                $parentCode = $parentCodes[$coaSubId - 1];
+            } else {
+                throw new Exception("Invalid coa_sub_id: {$coaSubId}");
+            }
 
-            // Ambil dua digit terakhir dari account_code jika ada
-            $lastNumber = $lastAccount ? (int) substr($lastAccount->account_code, -2) : 0;
+            Log::info('Parent code found.', ['parent_code' => $parentCode]);
 
-            Log::info('Last number calculated.', ['last_number' => $lastNumber]);
+            // Ambil nomor terakhir dan generate kode baru
+            $existingCodes = Coa::where('coa_sub_id', $coaSubId)
+                ->pluck('account_code')
+                ->toArray();
 
-            // Generate kode baru
-            $newAccountCode = sprintf('%01d%02d%02d', $coaTypeId, $request->coa_sub_id, $lastNumber + 1);
+            do {
+                if ($lastAccount) {
+                    // Jika ada account_code terakhir, tambahkan 10
+                    $newCode = $lastAccount->account_code + 10;
+                } else {
+                    // Jika tidak ada, generate berdasarkan parentCode dan counter
+                    $newCode = $parentCode + $counts[$coaSubId - 1] * 10;
+                    $counts[$coaSubId - 1]++;
+                }
+            } while (in_array($newCode, $existingCodes));
 
-            Log::info('New account code generated.', ['new_account_code' => $newAccountCode]);
+            Log::info('New account code generated.', ['new_account_code' => $newCode]);
 
-            return response()->json(['account_code' => $newAccountCode]);
+            return response()->json(['account_code' => $newCode]);
         } catch (\Exception $e) {
             Log::error('Error generating account code:', [
                 'error_message' => $e->getMessage(),
@@ -186,6 +228,7 @@ class CoaController extends Controller
             return response()->json(['message' => 'Internal Server Error'], 500);
         }
     }
+
 
 
     /**

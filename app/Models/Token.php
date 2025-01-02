@@ -10,6 +10,9 @@ class Token extends Model
 {
     use HasFactory;
 
+    public $incrementing = false; // Non-incrementing, karena UUID
+    protected $keyType = 'string'; // UUID disimpan sebagai string
+
     // Tentukan nama tabel (jika berbeda dengan nama model dalam bentuk plural)
     protected $table = 'tokens';
 

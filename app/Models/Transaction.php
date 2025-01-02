@@ -26,6 +26,8 @@ class Transaction extends Model
         'information',
         'transaction_date',
         'total_amount',
+        'payment_method_id',
+        'status',
     ];
 
     public function details()

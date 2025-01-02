@@ -11,22 +11,34 @@
     </thead>
     <tbody>
         @foreach ($generalLedger as $entry)
-            <tr>
-                <td class="text-center">{{ $entry->transaction_id }}</td>
-                <td class="text-center">{{ $entry->transaction_date }}</td>
-                <td>
-                    <div style="padding-left: {{ $entry->type == 'credit' ? '20px' : '0px' }};">
-                        {{ $entry->account_name }}
-                    </div>
-                </td>
-                <td class="text-center">{{ $entry->account_code }}</td>
-                <td class="text-end">
-                    {{ $entry->type == 'debit' ? number_format($entry->amount, 2) : '-' }}
-                </td>
-                <td class="text-end">
-                    {{ $entry->type == 'credit' ? number_format($entry->amount, 2) : '-' }}
-                </td>
-            </tr>
-        @endforeach
+        <tr>
+            <!-- Kolom ID -->
+            <td class="text-center">{{ $entry->transaction_id }}</td>
+            
+            <!-- Kolom Tanggal -->
+            <td class="text-center">{{ $entry->transaction_date }}</td>
+            
+            <!-- Kolom Nama Akun -->
+            <td>
+                <div style="padding-left: {{ $entry->type == 'credit' ? '20px' : '0px' }};">
+                    {{ $entry->account_name }}
+                </div>
+            </td>
+            
+            <!-- Kolom Kode Akun -->
+            <td class="text-center">{{ $entry->account_code }}</td>
+            
+            <!-- Kolom Debit -->
+            <td class="text-end">
+                {{ $entry->type == 'debit' ? number_format($entry->amount, 2) : '-' }}
+            </td>
+            
+            <!-- Kolom Kredit -->
+            <td class="text-end">
+                {{ $entry->type == 'credit' ? number_format($entry->amount, 2) : '-' }}
+            </td>
+        </tr>
+    @endforeach
+    
     </tbody>
 </table>

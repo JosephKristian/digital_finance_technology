@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\Token;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Validator;
 
 class TokenController extends Controller
 {
@@ -29,8 +31,8 @@ class TokenController extends Controller
      */
     public function store(Request $request)
     {
-        // Validasi input
-        $validated = $request->validate([
+        // Membuat validator manual
+        $validator = Validator::make($request->all(), [
             'expires_at' => 'required|date|after:now', // Harus tanggal valid dan setelah waktu saat ini
         ], [
             'expires_at.required' => 'Masa berlaku harus diisi.',
@@ -38,14 +40,33 @@ class TokenController extends Controller
             'expires_at.after' => 'Masa berlaku harus lebih dari waktu saat ini.',
         ]);
 
-        // Simpan data token ke database
-        $token = new Token();
-        $token->token = bin2hex(random_bytes(16)); // Membuat token unik
-        $token->expires_at = Carbon::parse($validated['expires_at']);
-        $token->save();
+        // Cek apakah validasi gagal
+        if ($validator->fails()) {
+            // Mendapatkan semua pesan kesalahan
+            $errors = $validator->errors()->all();
 
-        // Redirect kembali dengan pesan sukses
-        return redirect()->back()->with('success', 'Token berhasil dibuat.');
+            // Redirect kembali dengan pesan kesalahan dan input lama
+            return redirect()->back()
+                ->withErrors($errors)
+                ->withInput();
+        }
+
+        try {
+            // Simpan data token ke database
+            $token = new Token();
+            $token->token = bin2hex(random_bytes(2)); // Membuat token unik
+            $token->expires_at = Carbon::parse($request->input('expires_at'));
+            $token->save();
+
+            // Redirect kembali dengan pesan sukses
+            return redirect()->back()->with('success', 'Token berhasil dibuat.');
+        } catch (\Exception $e) {
+            // Log error untuk debugging
+            Log::error('Error saat menyimpan token: ' . $e->getMessage());
+
+            // Redirect kembali dengan pesan error
+            return redirect()->back()->with('error', 'Terjadi kesalahan saat membuat token. Silakan coba lagi.');
+        }
     }
 
     /**
@@ -77,6 +98,7 @@ class TokenController extends Controller
      */
     public function destroy(string $id)
     {
+        
         // Cari token berdasarkan ID
         $token = Token::find($id);
 

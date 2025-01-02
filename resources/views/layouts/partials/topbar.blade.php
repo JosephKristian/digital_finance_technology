@@ -1,5 +1,18 @@
-<!-- Navbar Brand-->
-<a class="navbar-brand ps-3" href="#">D I G I F I N T E C H</a>
+<!-- Navbar -->
+<nav class="navbar navbar-expand-lg">
+    <div class="container-fluid">
+        <!-- Navbar Brand -->
+        <a class="navbar-brand ps-3 text-white" href="#">D I G I F I N T E C H</a>
+        
+        <!-- Nama UMKM hanya tampil jika ada session -->
+        @if (session('umkmName'))
+            <p class="navbar-text ms-auto mb-0 text-white">{{ session('umkmName') }}</p>
+        @endif
+
+    </div>
+</nav>
+
+
 
 <!-- Sidebar Toggle-->
 <button class="btn btn-link btn-sm order-1 order-lg-0 me-4 me-lg-0" id="sidebarToggle" href="#!"><i
@@ -26,8 +39,5 @@
             </button>
         </div>
     </form>
-
-
-
 
 @endauth

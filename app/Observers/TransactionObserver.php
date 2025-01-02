@@ -4,7 +4,9 @@ namespace App\Observers;
 
 use App\Models\Coa;
 use App\Models\CoaType;
+use App\Models\Journal;
 use App\Models\Transaction;
+use App\Models\TransactionDetail;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
@@ -24,6 +26,70 @@ class TransactionObserver
      */
     public function updated(Transaction $transaction): void
     {
+
+        $details = DB::table('transaction_details')
+            ->join('transactions', 'transaction_details.transaction_id', '=', 'transactions.transaction_id')
+            ->join('products', 'transaction_details.product_id', '=', 'products.id')
+            ->where('transaction_details.transaction_id', $transaction->transaction_id)
+            ->select(
+                'transaction_details.*',  // Ambil semua kolom dari transaction_details
+                'transactions.*',         // Ambil semua kolom dari transactions
+                'products.*',  // Ambil nama produk
+
+            )
+            ->get();
+        // dd($transaction, $transaction->transaction_id, $details);
+
+        $coaCredit = Coa::where('umkm_id', $transaction->umkm->id)
+            ->where('is_active', true)
+            ->where('account_name', 'LIKE', '%Barang%')
+            ->whereHas('coaSub', function ($query) use ($transaction) {
+                $query->where('coa_type_id', 1)
+                    ->where('sub_name', 'PERSEDIAAN')
+                    ->where('umkm_id', $transaction->umkm->id);
+            })
+            ->first();
+
+        $coaDebit = Coa::where('umkm_id', $transaction->umkm->id)
+            ->where('is_active', true)
+            ->where('account_name', 'LIKE', '%Semua%')
+            ->whereHas('coaSub', function ($query) use ($transaction) {
+                $query->where('coa_type_id', 5)
+                    ->where('sub_name', 'PEMBELIAN')
+                    ->where('umkm_id', $transaction->umkm->id);
+            })
+            ->first();
+
+
+        if (!$coaDebit || !$coaCredit) {
+            redirect()->with('error', 'COA terkait tidak ditemukan.');
+        }
+
+        foreach ($details as $detail) {
+
+            // Membuat jurnal pembalikan berdasarkan transaksi
+            Journal::create([
+                'umkm_id' => $transaction->umkm->id,
+                'transaction_id' => $transaction->id,
+                'coa_id' => $coaDebit->id,
+                'description' => 'HPP - ' . $detail->name,
+                'amount' => $detail->purchase_price * $detail->quantity,
+                'type' => 'debit',
+            ]);
+
+
+            Journal::create([
+                'umkm_id' => $transaction->umkm->id,
+                'transaction_id' => $transaction->id,
+                'coa_id' => $coaCredit->id,
+                'description' => 'Persediaan -' . $detail->name,
+                'amount' => $detail->purchase_price * $detail->quantity,
+                'type' => 'credit',
+            ]);
+        }
+
+
+
         try {
             // Log awal observer berjalan
             Log::info('Observer UPDATED triggered for Transaction.', [
@@ -51,13 +117,25 @@ class TransactionObserver
 
             // Cari Cash COA
             try {
-                $cashCoa = Coa::where('umkm_id', $transaction->umkm_id)
-                    ->where('is_default_receipt', true) // Default penerimaan
-                    ->whereHas('coaSub', function ($query) use ($assetCoaType, $transaction) {
-                        $query->where('coa_type_id', $assetCoaType->coa_type_id)
-                            ->where('umkm_id', $transaction->umkm_id);
+                // $cashCoa = Coa::where('umkm_id', $transaction->umkm_id)
+                //     ->where('is_default_receipt', true) // Default penerimaan
+                //     ->whereHas('coaSub', function ($query) use ($assetCoaType, $transaction) {
+                //         $query->where('coa_type_id', $assetCoaType->coa_type_id)
+                //             ->where('umkm_id', $transaction->umkm_id);
+                //     })
+                //     ->first();
+
+                $cashCoa = Coa::where('umkm_id', $transaction->umkm->id)
+                    ->where('is_active', true)
+                    ->where('is_default_receipt', true)
+                    ->whereHas('coaSub', function ($query) use ($transaction) {
+                        $query->where('coa_type_id', 1)
+                            ->where('sub_name', 'AKTIVA')
+                            ->where('umkm_id', $transaction->umkm->id);
                     })
                     ->first();
+
+
 
                 // Log hasil query Cash COA
                 Log::info('Cash COA fetched successfully.', [
@@ -77,14 +155,25 @@ class TransactionObserver
             // Cari Income COA
             try {
 
-                $incomeCoa = Coa::where('umkm_id', $transaction->umkm_id)
-                    ->where('is_default_receipt', true) // Default penerimaan
-                    ->where('account_code', '40101') // Default penerimaan
-                    ->whereHas('coaSub', function ($query) use ($revenueCoaType, $transaction) {
-                        $query->where('coa_type_id', $revenueCoaType->coa_type_id)
-                            ->where('umkm_id', $transaction->umkm_id);
+                // $incomeCoa = Coa::where('umkm_id', $transaction->umkm_id)
+                //     ->where('is_default_receipt', true) // Default penerimaan
+                //     ->where('account_code', '40101') // Default penerimaan
+                //     ->whereHas('coaSub', function ($query) use ($revenueCoaType, $transaction) {
+                //         $query->where('coa_type_id', $revenueCoaType->coa_type_id)
+                //             ->where('umkm_id', $transaction->umkm_id);
+                //     })
+                //     ->first();
+
+                $incomeCoa = Coa::where('umkm_id', $transaction->umkm->id)
+                    ->where('is_active', true)
+                    ->where('account_code', 4110)
+                    ->whereHas('coaSub', function ($query) use ($transaction) {
+                        $query->where('coa_type_id', 4)
+                            ->where('sub_name', 'PENDAPATAN')
+                            ->where('umkm_id', $transaction->umkm->id);
                     })
                     ->first();
+
 
 
                 // Log hasil query Income COA

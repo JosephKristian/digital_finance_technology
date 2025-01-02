@@ -6,6 +6,7 @@ use App\Models\Customer;
 use App\Models\Journal;
 use App\Models\Product;
 use App\Models\Transaction;
+use App\Models\Umkm;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -94,13 +95,15 @@ class DashboardController extends Controller
             ];
         });
 
+
         // Simpan status approve ke session
         session(['umkm_approve' => $umkmData->approve]);
 
-        // dd($data);
+        session(['umkmName' => $umkmData->name]);
 
         // Kirim data UMKM ke view
         return view('umkm.dashboard', compact(
+            
             'umkmData',
             'data',
             'totalCustomers',

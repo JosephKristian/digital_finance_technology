@@ -7,7 +7,7 @@
 
         {{-- // Menampilkan modal jika session umkm_approve bernilai false --}}
         @if (session('umkm_approve') == 1)
-            <h1 class="h3 mb-4 text-gray-800">Selamat Datang, {{ Auth::user()->name }}!</h1>
+            <h1 class="h3 mb-4 text-gray-800">Selamat Datang, {{ $umkmData->name }}!</h1>
 
             @include('umkm.partials.cards')
             @include('umkm.partials.chart')

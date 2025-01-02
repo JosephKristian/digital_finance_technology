@@ -24,9 +24,10 @@ class OtherTransactionController extends Controller
      */
     public function index()
     {
+
         // Ambil data COA berdasarkan kategori coa_type_id
-        $incomeTypeId = CoaType::where('type_name', 'Revenue')->first()?->coa_type_id; // Cari ID untuk tipe Revenue
-        $expenseTypeId = CoaType::where('type_name', 'Expense')->first()?->coa_type_id; // Cari ID untuk tipe Expense
+        $incomeTypeId = CoaType::where('type_name', 'PENDAPATAN')->first()?->coa_type_id; // Cari ID untuk tipe Revenue
+        $expenseTypeId = CoaType::where('type_name', 'BEBAN')->first()?->coa_type_id; // Cari ID untuk tipe Expense
         $umkm = Umkm::where('user_id', Auth::user()->id)->firstOrFail();
         // Validasi jika tipe tidak ditemukan
         if (!$incomeTypeId || !$expenseTypeId) {
@@ -37,18 +38,28 @@ class OtherTransactionController extends Controller
             ->where('umkm_id', $umkm->id)
             ->whereHas('coaSub', function ($query) use ($umkm) {
                 $query->where('coa_type_id', 4) // 4 = Revenue
-                    ->where('umkm_id', $umkm->id);
+                    ->where('umkm_id', $umkm->id)
+                    ->where('coa_sub_id', 11)
+                    ->orWhere('coa_sub_id', 19)
+                ;
             })
-            ->pluck('account_name', 'id');
+            ->pluck('account_name', 'id')
+            ->sort();
+
+
 
         $expenseOptions = Coa::where('is_active', true)
             ->where('umkm_id', $umkm->id)
             ->whereHas('coaSub', function ($query) use ($umkm) {
-                $query->where('coa_type_id', 5) // 5 = Expense
-                    ->where('umkm_id', $umkm->id);
-            })
-            ->pluck('account_name', 'id');
+                $query->where('coa_type_id', 5) // 4 = Revenue
+                    ->where('umkm_id', $umkm->id)
+                    ->whereNotIn('coa_sub_id', [16, 17])
 
+                ;
+            })
+            ->pluck('account_name', 'id')
+            ->sort();
+            
 
         return view('umkm.transaction.others.index', [
             'incomeOptions' => $incomeOptions,
@@ -109,9 +120,14 @@ class OtherTransactionController extends Controller
         if ($request->kategori == 'income') {
             $coaDebit = Coa::where('umkm_id', $umkm->id)
                 ->where('is_active', true)
-                ->where('account_code', '10101')
                 ->where('is_default_receipt', true)
+                ->whereHas('coaSub', function ($query) use ($umkm) {
+                    $query->where('coa_type_id', 1)
+                        ->where('sub_name', 'AKTIVA')
+                        ->where('umkm_id', $umkm->id);
+                })
                 ->first();
+
 
             $coaCredit = Coa::where('id', $request->namaTransaksi)
                 ->where('umkm_id', $umkm->id)
@@ -125,9 +141,14 @@ class OtherTransactionController extends Controller
 
             $coaCredit = Coa::where('umkm_id', $umkm->id)
                 ->where('is_active', true)
-                ->where('account_code', '10101')
                 ->where('is_default_receipt', true)
+                ->whereHas('coaSub', function ($query) use ($umkm) {
+                    $query->where('coa_type_id', 1)
+                        ->where('sub_name', 'AKTIVA')
+                        ->where('umkm_id', $umkm->id);
+                })
                 ->first();
+
         }
 
         if (!$coaDebit || !$coaCredit) {

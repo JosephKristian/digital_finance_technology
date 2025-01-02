@@ -18,6 +18,7 @@
                             class="form-control" 
                             required 
                             placeholder="Pilih tanggal dan waktu">
+                        <small id="error-message" class="form-text text-danger" style="display: none;"></small>
                         <small class="form-text text-muted">
                             Pilih tanggal dan waktu kedaluwarsa token.
                         </small>

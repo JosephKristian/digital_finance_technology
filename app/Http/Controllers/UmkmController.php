@@ -44,13 +44,15 @@ class UmkmController extends Controller
         // Modifikasi data token jika ada
         $dataToken = $tokens ? collect($tokens)->map(function ($t) {
             return [
-                'id' => $t->id ?? null,
+                'id' => (string) $t->id ?? null,
                 'token' => $t->token ?? null,
                 'expires_at' => $t->expires_at ?? null,
             ];
-        }) : [];
+        })->toArray() : [];
 
-        $contents = Storage::get('w2vOuPq2RwTDU9iRlPkbXmgKE7tJMxlWHBVxl8Hk.pdf');
+        // dd($dataToken, $tokens);
+
+
 
         // Kirim data ke view
         return view('admin.umkms.index', [
@@ -168,7 +170,7 @@ class UmkmController extends Controller
             // Jika password tidak valid, kembalikan ke halaman dengan error
             return redirect()->back()->with('error', 'password anda salah !!!');
         }
-        
+
         // Cari UMKM berdasarkan ID
         $umkm = Umkm::findOrFail($id);
 

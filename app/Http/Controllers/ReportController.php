@@ -81,7 +81,8 @@ class ReportController extends Controller
             $expenses = Journal::where('umkm_id', $umkm->id)
                 ->whereHas('coa.coaSub', function ($query) {
                     $query->where('coa_type_id', 5) // Expense
-                        ->where('sub_name', '<>', 'Cost of Goods Sold'); // Exclude COGS
+                        ->where('coa_sub_id', 18)
+                        ->orWhere('coa_sub_id', 20);
                 })
                 ->where('type', 'debit')
                 ->whereHas('transaction', function ($query) use ($startDate, $endDate) {
@@ -91,26 +92,50 @@ class ReportController extends Controller
             Log::info('Beban (Expenses)', ['expenses' => $expenses]);
 
             // Biaya Produksi (Cost of Goods Sold)
-            $productionCosts = Journal::where('umkm_id', $umkm->id)
+            $pembelian = Journal::where('umkm_id', $umkm->id)
                 ->whereHas('coa.coaSub', function ($query) {
                     $query->where('coa_type_id', 5) // Expense
-                        ->where('coa_sub_id', 7); // Only COGS
+                        ->where('coa_sub_id', 15); // Pembelian
                 })
                 ->where('type', 'debit')
                 ->whereHas('transaction', function ($query) use ($startDate, $endDate) {
                     $query->whereBetween('transaction_date', [$startDate, $endDate]);
                 })
                 ->sum('amount');
+
+            $disc = Journal::where('umkm_id', $umkm->id)
+                ->whereHas('coa.coaSub', function ($query) {
+                    $query->where('coa_type_id', 5) // Expense
+                        ->where('coa_sub_id', 16); // Pembelian
+                })
+                ->where('type', 'debit')
+                ->whereHas('transaction', function ($query) use ($startDate, $endDate) {
+                    $query->whereBetween('transaction_date', [$startDate, $endDate]);
+                })
+                ->sum('amount');
+
+            $retur = Journal::where('umkm_id', $umkm->id)
+                ->whereHas('coa.coaSub', function ($query) {
+                    $query->where('coa_type_id', 5) // Expense
+                        ->where('coa_sub_id', 17); // Pembelian
+                })
+                ->where('type', 'debit')
+                ->whereHas('transaction', function ($query) use ($startDate, $endDate) {
+                    $query->whereBetween('transaction_date', [$startDate, $endDate]);
+                })
+                ->sum('amount');
+            $pengurangan = $disc + $retur;
+            $productionCosts = $pembelian - $pengurangan;
             Log::info('Biaya Produksi (COGS)', ['productionCosts' => $productionCosts]);
 
-            
+
 
 
             // Detail Beban (Expenses Details)
             $expensesDetails = Journal::where('umkm_id', $umkm->id)
                 ->whereHas('coa.coaSub', function ($query) {
-                    $query->where('coa_type_id', 5) // Expense
-                        ->where('sub_name', '<>', 'Cost of Goods Sold'); // Exclude COGS
+                    $query->where('coa_sub_id', 18)
+                        ->orWhere('coa_sub_id', 20);
                 })
                 ->where('type', 'debit')
                 ->whereHas('transaction', function ($query) use ($startDate, $endDate) {
@@ -317,8 +342,9 @@ class ReportController extends Controller
             ->where('type', 'debit') // Kredit menunjukkan pemasukan
             ->whereHas('coa.coaSub', function ($query) {
                 $query->where('coa_type_id', 1)
-                    ->where('sub_name', '<>', 'Fixed Assets') // Exclude COGS
-                    ->where('account_code', '10101'); // Exclude COGS
+
+                    ->where('is_default_receipt', true)
+                ;
             })
             ->whereHas('transaction', function ($query) use ($startDate, $endDate) {
                 $query->whereBetween('transaction_date', [$startDate, $endDate]);
@@ -368,7 +394,7 @@ class ReportController extends Controller
         $umkm = Umkm::where('user_id', Auth::user()->id)->firstOrFail();
         // dd($request->month,$request->year);
         // Validasi input bulan dan tahun
-        $validated = $request->validate([   
+        $validated = $request->validate([
             'month' => 'nullable|integer|min:1|max:12',
             'year' => 'nullable|integer|min:2000|max:' . date('Y'),
         ]);

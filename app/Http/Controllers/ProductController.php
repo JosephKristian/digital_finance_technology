@@ -29,6 +29,7 @@ class ProductController extends Controller
     // Menyimpan produk baru
     public function store(Request $request)
     {
+
         $umkm = Umkm::where('user_id', Auth::user()->id)->firstOrFail();
         $uuidTransaction = Str::uuid();
         $date = today();
@@ -55,18 +56,27 @@ class ProductController extends Controller
         ]);
 
 
+
         $coaDebit = Coa::where('umkm_id', $umkm->id)
             ->where('is_active', true)
-            ->where('account_code', '10103')
-            ->where('is_default_receipt', false)
-            ->where('is_default_expense', false)
+            ->where('account_name', 'LIKE', '%Barang%')
+            ->whereHas('coaSub', function ($query) use ($umkm) {
+                $query->where('coa_type_id', 1)
+                    ->where('sub_name', 'PERSEDIAAN')
+                    ->where('umkm_id', $umkm->id);
+            })
             ->first();
 
         $coaCredit = Coa::where('umkm_id', $umkm->id)
             ->where('is_active', true)
-            ->where('account_code', '10101')
             ->where('is_default_receipt', true)
+            ->whereHas('coaSub', function ($query) use ($umkm) {
+                $query->where('coa_type_id', 1)
+                    ->where('sub_name', 'AKTIVA')
+                    ->where('umkm_id', $umkm->id);
+            })
             ->first();
+
 
         if (!$coaDebit || !$coaCredit) {
             Log::error("COA terkait tidak ditemukan untuk transaksi ID: {$productId}", ['request' => $request->all()]);
@@ -130,21 +140,21 @@ class ProductController extends Controller
         try {
             // Mendapatkan data UMKM yang terkait dengan user
             $umkm = Umkm::where('user_id', Auth::user()->id)->firstOrFail();
-    
+
             // Mendapatkan produk yang ingin dihapus
             $product = Product::where('id', $id)
                 ->where('umkm_id', $umkm->id)
                 ->firstOrFail();
-    
+
             $productName = $product->name;
-    
+
             // Kalkulasi total nilai persediaan yang akan dihapus
             $totalValue = $product->purchase_price * $product->stock_quantity;
-    
+
             // Membuat ID transaksi baru
             $transactionId = Str::uuid();
             $transactionDate = now();
-    
+
             // Membuat transaksi
             Transaction::create([
                 'id' => $transactionId,
@@ -155,20 +165,32 @@ class ProductController extends Controller
                 'information' => 'Penghapusan Produk: ' . $productName,
                 'status' => 0, // Status diatur ke 0 untuk menunjukkan transaksi pembalikan
             ]);
-    
-            // Mendapatkan akun COA terkait
-            $coaDebit = Coa::where('umkm_id', $umkm->id)
-                ->where('account_code', '10101') // Kas atau rekening pengeluaran
-                ->first();
-    
+
+
             $coaCredit = Coa::where('umkm_id', $umkm->id)
-                ->where('account_code', '10103') // Persediaan
+                ->where('is_active', true)
+                ->where('account_name', 'LIKE', '%Barang%')
+                ->whereHas('coaSub', function ($query) use ($umkm) {
+                    $query->where('coa_type_id', 1)
+                        ->where('sub_name', 'PERSEDIAAN')
+                        ->where('umkm_id', $umkm->id);
+                })
                 ->first();
-    
+
+            $coaDebit = Coa::where('umkm_id', $umkm->id)
+                ->where('is_active', true)
+                ->where('is_default_receipt', true)
+                ->whereHas('coaSub', function ($query) use ($umkm) {
+                    $query->where('coa_type_id', 1)
+                        ->where('sub_name', 'AKTIVA')
+                        ->where('umkm_id', $umkm->id);
+                })
+                ->first();
+
             if (!$coaDebit || !$coaCredit) {
                 return redirect()->back()->with('error', 'COA terkait tidak ditemukan.');
             }
-    
+
             // Membuat jurnal pembalikan berdasarkan transaksi
             Journal::create([
                 'umkm_id' => $umkm->id,
@@ -178,7 +200,7 @@ class ProductController extends Controller
                 'amount' => $totalValue,
                 'type' => 'debit',
             ]);
-    
+
             Journal::create([
                 'umkm_id' => $umkm->id,
                 'transaction_id' => $transactionId,
@@ -187,14 +209,13 @@ class ProductController extends Controller
                 'amount' => $totalValue,
                 'type' => 'credit',
             ]);
-    
+
             // Menghapus produk
             $product->delete();
-    
+
             return redirect()->back()->with('success', 'Produk ' . $productName . ' berhasil dihapus, transaksi dicatat, dan jurnal telah diperbarui!');
         } catch (\Exception $e) {
             return redirect()->back()->with('error', 'Gagal menghapus produk: ' . $e->getMessage());
         }
     }
-    
 }
